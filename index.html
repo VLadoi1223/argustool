@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARGUS Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080b10;--bg1:#0c1018;--bg2:#111827;--bg3:#1a2340;
+  --border:#1e2d45;--border2:#243450;
+  --text:#c9d6e8;--text2:#7a90b0;--text3:#3d5068;
+  --accent:#3b82f6;--accent2:#60a5fa;
+  --teal:#14b8a6;--green:#22c55e;--amber:#f59e0b;
+  --red:#ef4444;--purple:#8b5cf6;--cyan:#06b6d4;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+  --cond:'IBM Plex Sans Condensed',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;height:100vh;overflow:hidden;}
+/* TOPBAR */
+.topbar{height:50px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:18px;position:relative;z-index:100;}
+.logo-mark{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid var(--border);}
+.logo-eye{width:28px;height:28px;border:1.5px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;}
+.logo-eye::before{content:'';width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent);}
+.logo-eye::after{content:'';position:absolute;width:18px;height:18px;border:1px solid rgba(59,130,246,0.3);border-radius:50%;animation:rotRing 4s linear infinite;}
+@keyframes rotRing{to{transform:rotate(360deg);}}
+.logo-name{font-family:var(--cond);font-weight:700;font-size:17px;letter-spacing:4px;color:#fff;}
+.logo-ver{font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;}
+.top-stats{display:flex;gap:20px;font-family:var(--mono);font-size:10px;color:var(--text3);}
+.tstat{display:flex;flex-direction:column;gap:1px;}
+.tstat-val{color:var(--text);font-size:12px;}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.abadge{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:2px;font-family:var(--mono);font-size:9px;letter-spacing:.5px;}
+.abadge.w{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--amber);}
+.abadge.c{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+.dp{width:5px;height:5px;border-radius:50%;animation:dp 1.4s ease-in-out infinite;}
+.dp.g{background:var(--green);box-shadow:0 0 5px var(--green);}
+.dp.a{background:var(--amber);box-shadow:0 0 5px var(--amber);animation-delay:.3s;}
+.dp.r{background:var(--red);box-shadow:0 0 5px var(--red);animation-delay:.6s;}
+.dp.b{background:var(--accent);box-shadow:0 0 5px var(--accent);animation-delay:.1s;}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.25}}
+.sys-time{font-family:var(--mono);font-size:11px;color:var(--text2);padding-left:12px;border-left:1px solid var(--border);}
+.sys-ok{font-family:var(--mono);font-size:8px;color:var(--green);letter-spacing:1px;}
+.opr{font-family:var(--mono);font-size:9px;color:var(--text3);}
+/* NAV */
+.nav{height:36px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:stretch;padding:0 18px;}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:0 16px;font-family:var(--cond);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;position:relative;top:0;transition:color .15s,border-color .15s;white-space:nowrap;}
+.nav-tab:hover{color:var(--text2);}
+.nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.tcnt{font-family:var(--mono);font-size:8px;background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:1px 4px;}
+/* PAGES */
+.page{display:none;height:calc(100vh - 86px);overflow:hidden;}
+.page.active{display:flex;flex-direction:column;}
+/* PANELS */
+.panel{background:var(--bg1);display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ph-title{display:flex;align-items:center;gap:7px;font-family:var(--cond);font-weight:700;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);}
+.ph-title svg{color:var(--accent);}
+.ph-b{display:flex;gap:5px;align-items:center;}
+.badge{font-family:var(--mono);font-size:8px;letter-spacing:.4px;padding:2px 6px;border-radius:2px;}
+.badge.live{background:rgba(34,197,94,.08);color:var(--green);border:1px solid rgba(34,197,94,.25);}
+.badge.warn{background:rgba(245,158,11,.08);color:var(--amber);border:1px solid rgba(245,158,11,.25);}
+.badge.alert{background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.badge.info{background:rgba(59,130,246,.08);color:var(--accent2);border:1px solid rgba(59,130,246,.25);}
+.badge.teal{background:rgba(20,184,166,.08);color:var(--teal);border:1px solid rgba(20,184,166,.25);}
+.badge.purple{background:rgba(139,92,246,.08);color:var(--purple);border:1px solid rgba(139,92,246,.25);}
+.pb{flex:1;overflow:hidden;padding:11px 13px;}
+.pb0{flex:1;overflow:hidden;padding:0;}
+/* SCROLLBAR */
+*::-webkit-scrollbar{width:3px;height:3px;}
+*::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* STATUSBAR */
+.sbar{position:fixed;bottom:0;left:0;right:0;height:22px;background:var(--bg1);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 13px;gap:18px;font-family:var(--mono);font-size:8px;color:var(--text3);z-index:200;}
+.sbv{color:var(--text2);}
+/* KPI row */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);flex-shrink:0;}
+.kpi{background:var(--bg1);padding:11px 13px;border-bottom:2px solid transparent;}
+.kpi.kb{border-color:var(--accent)}.kpi.kg{border-color:var(--green)}.kpi.ka{border-color:var(--amber)}.kpi.kr{border-color:var(--red)}.kpi.kt{border-color:var(--teal)}
+.kpi-l{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
+.kpi-v{font-family:var(--mono);font-size:20px;color:#fff;line-height:1;}
+.kpi-s{font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:2px;}
+.kpi-s.up{color:var(--green)}.kpi-s.dn{color:var(--red)}
+/* ACTIVITY */
+.act-feed{font-family:var(--mono);font-size:10px;height:100%;overflow-y:auto;}
+.act-row{display:grid;grid-template-columns:58px 75px 1fr 44px;gap:8px;padding:6px 0;border-bottom:1px solid rgba(30,45,69,.5);align-items:start;}
+.act-t{color:var(--text3)}.act-src{font-size:8px;padding:1px 4px;border-radius:2px;}
+.act-m{color:var(--text);line-height:1.5;}.act-m em{font-style:normal;color:var(--amber);}
+.act-c{color:var(--green);text-align:right;}
+/* ALERTS */
+.alert-list .ai{display:flex;align-items:flex-start;gap:8px;padding:8px 13px;border-bottom:1px solid var(--border);}
+.ai-sev{width:2px;align-self:stretch;border-radius:1px;flex-shrink:0;}
+.ai-sev.c{background:var(--red)}.ai-sev.h{background:var(--amber)}.ai-sev.m{background:var(--accent)}
+.ai-title{font-family:var(--cond);font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.ai-meta{font-family:var(--mono);font-size:8.5px;color:var(--text3);}
+.ai-time{font-family:var(--mono);font-size:8.5px;color:var(--text3);white-space:nowrap;}
+/* DATA TABLE */
+.dtable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+.dtable th{padding:5px 9px;text-align:left;font-size:8px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
+.dtable td{padding:6px 9px;border-bottom:1px solid rgba(30,45,69,.4);color:var(--text);vertical-align:middle;}
+.dtable tr:hover td{background:rgba(59,130,246,.03);}
+.pbar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:3px;}
+.pbar-f{height:100%;border-radius:2px;}
+/* ENTITY LIST */
+.ent-list{overflow-y:auto;height:100%;}
+.ent-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.ent-row:hover{background:rgba(59,130,246,.04);}
+.ent-row.sel{background:rgba(59,130,246,.07);border-left:2px solid var(--accent);padding-left:10px;}
+.ent-av{width:34px;height:34px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--border2);overflow:hidden;flex-shrink:0;object-fit:cover;}
+.ent-info{flex:1;min-width:0;}
+.ent-name{font-family:var(--cond);font-size:11px;font-weight:600;color:var(--text);margin-bottom:1px;}
+.ent-meta{font-family:var(--mono);font-size:8.5px;color:var(--text3);}
+.ent-risk{font-family:var(--mono);font-size:9px;font-weight:500;}
+.ent-risk.h{color:var(--red)}.ent-risk.m{color:var(--amber)}.ent-risk.l{color:var(--green)}.ent-risk.w{color:var(--purple)}
+/* PROFILE */
+.prof-photo{width:88px;height:88px;border-radius:3px;overflow:hidden;border:1.5px solid var(--border2);flex-shrink:0;}
+.prof-photo img{width:100%;height:100%;object-fit:cover;}
+.prof-name{font-family:var(--cond);font-size:15px;font-weight:700;color:#fff;margin-bottom:2px;}
+.prof-role{font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:6px;}
+.dtrow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(30,45,69,.4);font-family:var(--mono);font-size:9.5px;}
+.dtrow:last-child{border:none;}
+.dtk{color:var(--text3)}.dtv{color:var(--text)}.dtv.flag{color:var(--amber)}.dtv.danger{color:var(--red)}.dtv.ok{color:var(--green)}
+.tag-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.tag{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:2px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);}
+.rbar-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:3px;}
+.rbar-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--red));animation:rbi 1.2s ease-out;}
+@keyframes rbi{from{width:0!important}}
+/* INTEL */
+.intel-feed{font-family:var(--mono);font-size:10px;height:100%;overflow-y:auto;}
+.irow{display:grid;grid-template-columns:55px 72px 1fr 42px;gap:7px;padding:6px 0;border-bottom:1px solid rgba(30,45,69,.4);animation:fadeIn .2s ease-out;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.it{color:var(--text3)}.isrc{font-size:8.5px;}
+.isrc.osint{color:var(--teal)}.isrc.humint{color:var(--purple)}.isrc.sigint{color:var(--amber)}.isrc.finint{color:var(--green)}.isrc.econ{color:var(--cyan)}.isrc.cyber{color:var(--red)}.isrc.geo{color:var(--accent2)}
+.im{color:var(--text);line-height:1.55;}.im span{color:var(--teal);}
+.ic{text-align:right;}.ic.hi{color:var(--green)}.ic.md{color:var(--amber)}.ic.lo{color:var(--red)}
+/* TRANSCRIPT */
+.a-scope{display:flex;align-items:flex-end;gap:1px;height:44px;padding:0 2px;margin-bottom:10px;}
+.sbar-b{flex:1;border-radius:1px;background:linear-gradient(0deg,var(--teal),rgba(59,130,246,.7));animation:sba .1s ease-in-out infinite alternate;}
+@keyframes sba{from{transform:scaleY(.1)}to{transform:scaleY(1)}}
+.tx-scroll{overflow-y:auto;height:calc(100% - 64px);}
+.t-block{padding:7px 0;border-bottom:1px solid rgba(30,45,69,.4);}
+.t-sp{font-family:var(--mono);font-size:8px;letter-spacing:1px;margin-bottom:3px;}
+.t-sp.sa{color:var(--accent2)}.t-sp.sb{color:var(--amber)}.t-sp.sc{color:var(--teal)}
+.t-tx{font-family:var(--mono);font-size:10px;color:var(--text);line-height:1.6;}
+.t-tx .tk{color:var(--green);background:rgba(34,197,94,.07);padding:0 2px;border-radius:1px;}
+.t-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.t-tag{font-family:var(--mono);font-size:7.5px;padding:1px 5px;border-radius:1px;border:1px solid;}
+.t-tag.c{color:var(--accent2);border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06);}
+.t-tag.w{color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06);}
+.t-tag.r{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06);}
+.t-tag.g{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06);}
+/* ECON TICKER */
+.econ-ticker{background:rgba(6,182,212,.06);border-top:1px solid rgba(6,182,212,.2);border-bottom:1px solid rgba(6,182,212,.2);height:28px;display:flex;align-items:center;overflow:hidden;flex-shrink:0;}
+.ticker-inner{display:flex;gap:0;animation:tickerMove 60s linear infinite;white-space:nowrap;}
+@keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker-item{font-family:var(--mono);font-size:9px;padding:0 20px;border-right:1px solid rgba(6,182,212,.15);color:var(--text2);display:flex;align-items:center;gap:6px;}
+.ticker-item .ti-label{color:var(--cyan);font-weight:500;}
+.ticker-item .ti-up{color:var(--green)}.ticker-item .ti-dn{color:var(--red)}
+/* MACRO ALERT TOASTS */
+#macroToasts{position:fixed;bottom:30px;right:16px;display:flex;flex-direction:column;gap:6px;z-index:500;width:300px;}
+.macro-toast{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--cyan);padding:9px 12px;border-radius:2px;animation:toastIn .3s ease-out;font-family:var(--mono);}
+.macro-toast.econ{border-left-color:var(--cyan);}
+.macro-toast.geo{border-left-color:var(--amber);}
+.macro-toast.fin{border-left-color:var(--green);}
+.macro-toast.sec{border-left-color:var(--red);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast-type{font-size:7.5px;letter-spacing:1.5px;margin-bottom:3px;}
+.toast-msg{font-size:9px;color:var(--text);line-height:1.5;}
+.toast-time{font-size:7.5px;color:var(--text3);margin-top:2px;}
+/* CAM GRID */
+.cam-grid-main{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:2px;height:100%;background:var(--bg);}
+.cam-cell{position:relative;overflow:hidden;background:#000;border:1px solid #1a2236;cursor:pointer;transition:border-color .15s;}
+.cam-cell:hover{border-color:var(--accent);z-index:2;}
+.cam-cell.featured{grid-column:span 2;grid-row:span 2;}
+.cam-cell.alert-c{border-color:var(--red)!important;}
+.cam-canvas{width:100%;height:100%;display:block;}
+.cam-top{position:absolute;top:0;left:0;right:0;padding:6px 8px;display:flex;justify-content:space-between;background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,transparent 100%);}
+.cam-id{font-family:var(--mono);font-size:8.5px;color:rgba(255,255,255,.7);letter-spacing:.8px;}
+.cam-rec{display:flex;align-items:center;gap:3px;font-family:var(--mono);font-size:7.5px;color:var(--red);}
+.cam-rdot{width:4px;height:4px;border-radius:50%;background:var(--red);animation:dp 1s infinite;}
+.cam-bot{position:absolute;bottom:0;left:0;right:0;padding:4px 8px 5px;display:flex;justify-content:space-between;background:linear-gradient(0deg,rgba(0,0,0,.75) 0%,transparent 100%);}
+.cam-loc{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,.55);}
+.cam-stat{font-family:var(--mono);font-size:8px;}
+.cam-stat.ok{color:rgba(34,197,94,.8)}.cam-stat.mov{color:rgba(245,158,11,.9)}.cam-stat.trk{color:rgba(239,68,68,.95)}
+.det-box{position:absolute;border:1.5px solid;pointer-events:none;}
+.det-box.did{border-color:var(--accent)}.det-box.dunk{border-color:var(--amber)}.det-box.dtgt{border-color:var(--red);animation:dbf .7s ease-in-out infinite alternate;}
+@keyframes dbf{to{box-shadow:0 0 10px rgba(239,68,68,.5);}}
+.det-lbl{position:absolute;top:-15px;left:0;font-family:var(--mono);font-size:7px;white-space:nowrap;padding:1px 3px;border-radius:1px;}
+.det-box.did .det-lbl{background:var(--accent);color:#fff;}
+.det-box.dunk .det-lbl{background:var(--amber);color:#000;}
+.det-box.dtgt .det-lbl{background:var(--red);color:#fff;}
+/* SURV SIDEBAR */
+.surv-sb{width:260px;background:var(--bg1);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo-mark">
+    <div class="logo-eye"></div>
+    <div><div class="logo-name">ARGUS</div><div class="logo-ver">INTELLIGENCE PLATFORM v4.2.1 — CLASSIFIED</div></div>
+  </div>
+  <div class="top-stats">
+    <div class="tstat"><span class="logo-ver">NODES</span><span class="tstat-val" id="ts1">847</span></div>
+    <div class="tstat"><span class="logo-ver">STREAMS</span><span class="tstat-val">12,447</span></div>
+    <div class="tstat"><span class="logo-ver">ENTITIES</span><span class="tstat-val">1,204</span></div>
+    <div class="tstat"><span class="logo-ver">CAMERAS</span><span class="tstat-val">388</span></div>
+    <div class="tstat"><span class="logo-ver">AUDIO SESS.</span><span class="tstat-val">47</span></div>
+  </div>
+  <div class="top-right">
+    <div class="abadge w"><div class="dp a"></div>2 WARNINGS</div>
+    <div class="abadge c"><div class="dp r"></div>1 CRITICAL</div>
+    <div class="sys-time"><div id="clk">--:--:-- UTC</div><div class="sys-ok">SYSTEM NOMINAL</div></div>
+    <div class="opr">OPR: ANALYST-7 &nbsp;|&nbsp; SESSION #AR-2291</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-tab active" onclick="showPage('overview',this)">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
+  </div>
+  <div class="nav-tab" onclick="showPage('surveillance',this)">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Surveillance<span class="tcnt">1</span>
+  </div>
+  <div class="nav-tab" onclick="showPage('intelligence',this)">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Intelligence
+  </div>
+  <div class="nav-tab" onclick="showPage('analytics',this)">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics
+  </div>
+  <div class="nav-tab" onclick="showPage('entities',this)">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Entities
+  </div>
+  <div class="nav-tab" onclick="showPage('satellite',this)">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Satellite
+  </div>
+</div>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div id="page-overview" class="page active">
+  <div class="kpi-strip">
+    <div class="kpi kb"><div class="kpi-l">Databases Scoured</div><div class="kpi-v" id="kv1">2,891</div><div class="kpi-s up">↑ +44 this hour</div></div>
+    <div class="kpi kg"><div class="kpi-l">Active Cameras</div><div class="kpi-v">388</div><div class="kpi-s up">↑ 12 added today</div></div>
+    <div class="kpi ka"><div class="kpi-l">Audio Sessions</div><div class="kpi-v">47</div><div class="kpi-s">● 6 live</div></div>
+    <div class="kpi kr"><div class="kpi-l">Active Alerts</div><div class="kpi-v">3</div><div class="kpi-s dn">↑ 1 new critical</div></div>
+    <div class="kpi kt"><div class="kpi-l">Prediction Accuracy</div><div class="kpi-v">91.4%</div><div class="kpi-s up">↑ +2.1% vs last week</div></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.8fr 1.1fr 1fr;gap:1px;background:var(--border);min-height:0;">
+    <div class="panel">
+      <div class="ph">
+        <div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live Intelligence Feed</div>
+        <div class="badge live">● LIVE</div>
+      </div>
+      <div class="pb" style="overflow:hidden;"><div class="act-feed" id="actFeed"></div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Active Alerts</div><div class="badge alert">3 OPEN</div></div>
+      <div class="pb0 alert-list">
+        <div class="ai"><div class="ai-sev c"></div><div class="ai-body"><div class="ai-title">CRITICAL — Financial Anomaly</div><div class="ai-meta">ARG-7741-C · CHF 847K wire to BVI entity · Flagged 08:41</div></div><div class="ai-time">08:41</div></div>
+        <div class="ai"><div class="ai-sev h"></div><div class="ai-body"><div class="ai-title">HIGH — Pattern Match 94.2%</div><div class="ai-meta">CAM-012 Parking · Subject reappearance logged</div></div><div class="ai-time">08:29</div></div>
+        <div class="ai"><div class="ai-sev h"></div><div class="ai-body"><div class="ai-title">HIGH — Shell Entity Registered</div><div class="ai-meta">Silversand Holdings · Geneva · Linked ARG-7741-C</div></div><div class="ai-time">07:55</div></div>
+        <div class="ai"><div class="ai-sev m"></div><div class="ai-body"><div class="ai-title">MED — Geopolitical Risk Elevated</div><div class="ai-meta">MENA corridor · Instability index 87% · Window 14d</div></div><div class="ai-time">07:12</div></div>
+        <div class="ai"><div class="ai-sev m"></div><div class="ai-body"><div class="ai-title">MED — ECB Rate Decision Imminent</div><div class="ai-meta">Macro trigger linked to CHF capital flows · Monitor</div></div><div class="ai-time">06:30</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>System Status</div><div class="badge live">NOMINAL</div></div>
+      <div class="pb">
+        <canvas id="sysChart" style="width:100%;height:90px;display:block;margin-bottom:10px;"></canvas>
+        <div style="font-family:var(--mono);font-size:9.5px;">
+          <div class="dtrow"><span class="dtk">CPU Load</span><span class="dtv ok">38.4%</span></div>
+          <div class="dtrow"><span class="dtk">Memory</span><span class="dtv">14.2 / 64 GB</span></div>
+          <div class="dtrow"><span class="dtk">Network I/O</span><span class="dtv">2.4 Gbps</span></div>
+          <div class="dtrow"><span class="dtk">Storage</span><span class="dtv">4.8 / 20 TB</span></div>
+          <div class="dtrow"><span class="dtk">DB Queries/s</span><span class="dtv" style="color:var(--accent2)" id="qps">1,247</span></div>
+          <div class="dtrow"><span class="dtk">Inference Engine</span><span class="dtv ok">ONLINE</span></div>
+          <div class="dtrow"><span class="dtk">Uptime</span><span class="dtv">47d 14h 22m</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SURVEILLANCE ═══ -->
+<div id="page-surveillance" class="page" style="flex-direction:row;">
+  <div style="flex:1;overflow:hidden;" id="camWrap">
+    <div class="cam-grid-main" id="camGrid"></div>
+  </div>
+  <div class="surv-sb">
+    <div class="ph"><div class="ph-title"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Detection Log</div><div class="badge live">LIVE</div></div>
+    <div style="flex:1;overflow-y:auto;" id="detLog"></div>
+    <div style="border-top:1px solid var(--border);padding:9px 12px;font-family:var(--mono);font-size:9px;color:var(--text2);">
+      <div style="font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);margin-bottom:7px;">PATTERN ANALYSIS</div>
+      <div>Gait match: <span style="color:var(--amber)">78.3%</span></div>
+      <div>Facial conf.: <span style="color:var(--red)">94.2%</span></div>
+      <div>Route pattern: <span style="color:var(--teal)">Counter-surveillance</span></div>
+      <div style="margin-top:6px;color:var(--text3)">Trajectory update: <span style="color:var(--text2)" id="trajT">--:--:--</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INTELLIGENCE ═══ -->
+<div id="page-intelligence" class="page">
+  <!-- Economic ticker -->
+  <div class="econ-ticker">
+    <div class="ticker-inner" id="econTicker"></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.6fr 1fr;gap:1px;background:var(--border);min-height:0;">
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);">
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Multi-Source Intelligence Feed</div>
+          <div class="ph-b"><span style="font-family:var(--mono);font-size:8px;color:var(--text3);">OSINT · SIGINT · ECON · GEO · FININT</span><div class="badge live">● STREAMING</div></div>
+        </div>
+        <div class="pb0" style="overflow:hidden;">
+          <div style="display:grid;grid-template-columns:55px 72px 1fr 42px;gap:7px;padding:5px 13px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:7.5px;color:var(--text3);letter-spacing:1px;">
+            <span>TIME</span><span>SOURCE</span><span>INTELLIGENCE</span><span style="text-align:right">CONF</span>
+          </div>
+          <div class="intel-feed" id="intelFeed"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>Live Audio — Session INL-2241</div><div class="ph-b"><div class="badge teal">AUTHORIZED</div><div class="badge live">● LIVE</div></div></div>
+        <div class="pb"><div class="a-scope" id="aScope"></div><div class="tx-scroll" id="txDiv"></div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:auto 1fr auto;gap:1px;background:var(--border);">
+      <div class="panel" style="flex:none;">
+        <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Macro Economic Events — Live</div><div class="badge info">ECON MONITOR</div></div>
+        <div class="pb0">
+          <div id="macroBand" style="overflow-y:auto;max-height:140px;"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Key Intelligence — Summary</div><div class="badge info">AUTO-GEN</div></div>
+        <div class="pb" style="overflow-y:auto;">
+          <div style="font-family:var(--sans);font-size:11px;color:var(--text2);line-height:1.8;">
+            <p style="margin-bottom:9px;">Subject <span style="color:var(--teal)">ARG-7741-C</span> is demonstrating high-risk capital movement behavior corroborated across 847 intercept sessions, 23 associate profiles, and 4 flagged wire transfers spanning 7 jurisdictions.</p>
+            <p style="margin-bottom:9px;"><strong style="color:var(--amber)">ECB rate decision</strong> scheduled 72h coincides with subject's planned departure to Dubai DIFC, suggesting time-sensitive positioning. Cross-reference with CHF capital outflow pattern indicates deliberate hedge.</p>
+            <p>Upcoming travel window <span style="color:var(--red)">ZRH→DXB (+48h)</span> aligns with known counterparty K. Al-Rashid meeting. Recommend Level 3 escalation and travel document flag.</p>
+          </div>
+          <div style="margin-top:10px;padding:9px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:2px;">
+            <div style="font-family:var(--mono);font-size:8px;color:var(--red);letter-spacing:1px;margin-bottom:4px;">RECOMMENDED ACTION</div>
+            <div style="font-family:var(--sans);font-size:10.5px;color:var(--text);">Escalate to Level 3. Flag ZRH passport. Coordinate with financial intelligence unit re: BVI-4421 beneficial ownership. Cross-reference ECB rate impact on CHF corridor capital flows.</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="flex:none;">
+        <div class="ph"><div class="ph-title">Keyword Extraction — NLP</div><div class="badge info">MODEL v7</div></div>
+        <div class="pb"><div style="display:flex;flex-wrap:wrap;gap:5px;" id="kwCloud"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ANALYTICS ═══ -->
+<div id="page-analytics" class="page">
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);min-height:0;">
+
+    <!-- Threat Trend -->
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Threat Activity — 30 Day Trend</div><div class="badge info">TIME SERIES</div></div>
+      <div class="pb" style="padding:8px;"><canvas id="trendChart" style="width:100%;height:100%;display:block;"></canvas></div>
+    </div>
+
+    <!-- Spider / Radar — ARG-7741-C -->
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>ARG-7741-C — Financial Risk Radar</div><div class="badge alert">FLAGGED CHF 4.2M</div></div>
+      <div class="pb" style="padding:4px;"><canvas id="radarChart" style="width:100%;height:100%;display:block;"></canvas></div>
+    </div>
+
+    <!-- Predictive Model -->
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Predictive Risk Forecasts — AI v7.1</div><div class="badge info">6 ACTIVE</div></div>
+      <div class="pb0">
+        <table class="dtable">
+          <thead><tr><th>DOMAIN</th><th>FORECAST</th><th>PROB.</th><th>WINDOW</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--accent2)">Geopolitical</td><td>MENA Corridor Instability</td><td><div>87%</div><div class="pbar"><div class="pbar-f" style="width:87%;background:var(--accent2)"></div></div></td><td style="color:var(--amber)">14–21d</td></tr>
+            <tr><td style="color:var(--green)">Financial</td><td>Energy Futures +12%</td><td><div>91%</div><div class="pbar"><div class="pbar-f" style="width:91%;background:var(--green)"></div></div></td><td style="color:var(--green)">7–10d</td></tr>
+            <tr><td style="color:var(--amber)">Economic</td><td>CHF Capital Flight</td><td><div>83%</div><div class="pbar"><div class="pbar-f" style="width:83%;background:var(--amber)"></div></div></td><td style="color:var(--amber)">48–96h</td></tr>
+            <tr><td style="color:var(--red)">Security</td><td>Non-State Convergence</td><td><div>78%</div><div class="pbar"><div class="pbar-f" style="width:78%;background:var(--red)"></div></div></td><td style="color:var(--red)">72h</td></tr>
+            <tr><td style="color:var(--purple)">Cyber</td><td>Targeted Phishing Wave</td><td><div>52%</div><div class="pbar"><div class="pbar-f" style="width:52%;background:var(--purple)"></div></div></td><td style="color:var(--text3)">Unknown</td></tr>
+            <tr><td style="color:var(--cyan)">Macro</td><td>ECB Rate Cut Impact</td><td><div>74%</div><div class="pbar"><div class="pbar-f" style="width:74%;background:var(--cyan)"></div></div></td><td style="color:var(--green)">5d</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Financial Breakdown — ARG-7741-C -->
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financial Breakdown — ARG-7741-C (CHF 4.2M)</div><div class="badge alert">FLAGGED</div></div>
+      <div class="pb" style="overflow-y:auto;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:var(--bg2);border:1px solid var(--border2);padding:8px 10px;border-radius:2px;">
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-bottom:3px;">TOTAL FLAGGED</div>
+            <div style="font-family:var(--mono);font-size:18px;color:var(--red);">CHF 4.2M</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border2);padding:8px 10px;border-radius:2px;">
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-bottom:3px;">UNEXPLAINED</div>
+            <div style="font-family:var(--mono);font-size:18px;color:var(--amber);">CHF 2.8M</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9.5px;">
+          <div class="dtrow"><span class="dtk">UBS Zürich (acct. ••4421)</span><span class="dtv flag">CHF 890K</span></div>
+          <div class="dtrow"><span class="dtk">Credit Suisse Remnant (••0872)</span><span class="dtv flag">CHF 450K</span></div>
+          <div class="dtrow"><span class="dtk">Julius Bär Private (••3310)</span><span class="dtv flag">CHF 620K</span></div>
+          <div class="dtrow"><span class="dtk">Liechtensteinische LGT (••7720)</span><span class="dtv flag">CHF 310K</span></div>
+          <div class="dtrow"><span class="dtk">Shell-BVI-4421 (wires)</span><span class="dtv danger">CHF 847K</span></div>
+          <div class="dtrow"><span class="dtk">Silversand Holdings GVA</span><span class="dtv danger">CHF 480K</span></div>
+          <div class="dtrow"><span class="dtk">Cayman LP Fund II</span><span class="dtv danger">CHF 340K</span></div>
+          <div class="dtrow"><span class="dtk">Crypto wallets (est.)</span><span class="dtv flag">CHF 263K</span></div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+            <div class="dtrow"><span class="dtk">Total Offshore</span><span class="dtv danger">CHF 3.1M (73.8%)</span></div>
+            <div class="dtrow"><span class="dtk">Jurisdictions</span><span class="dtv">CH, BVI, KY, LI, UAE, SG, PA</span></div>
+            <div class="dtrow"><span class="dtk">Wire Transfers</span><span class="dtv flag">22 flagged</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Network Chart -->
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Associate Network — ARG-7741-C</div><div class="badge warn">23 NODES</div></div>
+      <div class="pb" style="padding:0;"><canvas id="netChart" style="width:100%;height:100%;display:block;"></canvas></div>
+    </div>
+
+    <!-- Macro economic indicators -->
+    <div class="panel">
+      <div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Macro Economic Indicators</div><div class="badge teal">LIVE DATA</div></div>
+      <div class="pb" style="overflow-y:auto;">
+        <canvas id="macroChart" style="width:100%;height:120px;display:block;margin-bottom:12px;"></canvas>
+        <div style="font-family:var(--mono);font-size:9.5px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div class="dtrow"><span class="dtk">EUR/CHF</span><span class="dtv" style="color:var(--green)">0.9412 ↑</span></div>
+            <div class="dtrow"><span class="dtk">USD/CHF</span><span class="dtv" style="color:var(--red)">0.8844 ↓</span></div>
+            <div class="dtrow"><span class="dtk">ECB Rate</span><span class="dtv flag">4.50% (decision 72h)</span></div>
+            <div class="dtrow"><span class="dtk">SNB Rate</span><span class="dtv">1.75%</span></div>
+            <div class="dtrow"><span class="dtk">SMI Index</span><span class="dtv" style="color:var(--green)">11,842 +1.2%</span></div>
+            <div class="dtrow"><span class="dtk">Gold Spot</span><span class="dtv flag">$2,341/oz ↑ 2.1%</span></div>
+            <div class="dtrow"><span class="dtk">WTI Crude</span><span class="dtv">$84.20/bbl</span></div>
+            <div class="dtrow"><span class="dtk">VIX</span><span class="dtv" style="color:var(--amber)">21.4 ELEVATED</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ ENTITIES ═══ -->
+<div id="page-entities" class="page" style="flex-direction:row;">
+  <div style="width:290px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg1);">
+    <div class="ph"><div class="ph-title"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Entity Database</div><div style="font-family:var(--mono);font-size:8px;color:var(--text3);">1,204 tracked</div></div>
+    <div style="padding:7px 12px;border-bottom:1px solid var(--border);"><input type="text" placeholder="Search entities..." style="width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:9px;padding:4px 9px;border-radius:2px;outline:none;"/></div>
+    <div style="padding:5px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+      <span style="font-family:var(--mono);font-size:7.5px;padding:2px 6px;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);border-radius:1px;cursor:pointer;">FUGITIVE</span>
+      <span style="font-family:var(--mono);font-size:7.5px;padding:2px 6px;background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);border-radius:1px;cursor:pointer;">HIGH RISK</span>
+      <span style="font-family:var(--mono);font-size:7.5px;padding:2px 6px;background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.2);border-radius:1px;cursor:pointer;">INTERPOL</span>
+      <span style="font-family:var(--mono);font-size:7.5px;padding:2px 6px;background:rgba(59,130,246,.1);color:var(--accent2);border:1px solid rgba(59,130,246,.2);border-radius:1px;cursor:pointer;">ALL</span>
+    </div>
+    <div class="ent-list" id="entList"></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-rows:auto 1fr;gap:1px;background:var(--border);overflow:hidden;" id="entDetail">
+    <!-- Detail populated by JS -->
+  </div>
+</div>
+
+<!-- ═══ SATELLITE ═══ -->
+<div id="page-satellite" class="page" style="flex-direction:row;">
+  <div style="flex:1;overflow:hidden;background:#03060f;position:relative;" id="globeWrap">
+    <div style="position:absolute;top:0;left:0;right:0;z-index:10;background:rgba(3,6,15,.85);backdrop-filter:blur(4px);">
+      <div class="ph">
+        <div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Satellite Geospatial Intelligence — Live</div>
+        <div class="ph-b"><span style="font-family:var(--mono);font-size:8px;color:var(--text3);">Drag to rotate · Scroll to zoom</span><div class="badge live">● LIVE</div></div>
+      </div>
+    </div>
+    <canvas id="globeCanvas" style="width:100%;height:100%;display:block;cursor:grab;"></canvas>
+  </div>
+  <div style="width:290px;flex-shrink:0;background:var(--bg1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+    <div class="ph"><div class="ph-title"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Active Events</div><div class="badge alert">12</div></div>
+    <div style="flex:1;overflow-y:auto;" id="evList"></div>
+    <div class="panel" style="flex:none;border-top:1px solid var(--border);">
+      <div class="ph"><div class="ph-title">Satellite Telemetry</div><div class="badge live">NOMINAL</div></div>
+      <div class="pb">
+        <div style="font-family:var(--mono);font-size:9.5px;">
+          <div class="dtrow"><span class="dtk">Orbit</span><span class="dtv ok">LEO · 412 km</span></div>
+          <div class="dtrow"><span class="dtk">Coverage</span><span class="dtv" style="color:var(--accent2)">Global · 94.7%</span></div>
+          <div class="dtrow"><span class="dtk">Resolution</span><span class="dtv">0.3 m / px</span></div>
+          <div class="dtrow"><span class="dtk">Revisit Time</span><span class="dtv">90 min</span></div>
+          <div class="dtrow"><span class="dtk">SAR Active</span><span class="dtv ok">YES</span></div>
+          <div class="dtrow"><span class="dtk">Spectral Band</span><span class="dtv">Multi-spectral</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MACRO TOASTS -->
+<div id="macroToasts"></div>
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <div style="display:flex;align-items:center;gap:5px;"><div class="dp g" style="width:4px;height:4px;"></div><span class="sbv">NOMINAL</span></div>
+  <span style="color:var(--border2)">|</span>
+  <span>DB: <span class="sbv" id="sb1">2,891,442</span></span>
+  <span>ENTITIES: <span class="sbv">1,204</span></span>
+  <span>CAMERAS: <span class="sbv">388</span></span>
+  <span>AUDIO: <span class="sbv">47</span></span>
+  <span>ALERTS: <span class="sbv" style="color:var(--red)">3</span></span>
+  <span style="color:var(--border2)">|</span>
+  <span>CPU: <span class="sbv">38%</span></span>
+  <span>NET: <span class="sbv">2.4 Gbps</span></span>
+  <div style="margin-left:auto;color:var(--text3);letter-spacing:1px;">ARGUS INTELLIGENCE PLATFORM · CLASSIFIED · AUTHORIZED ACCESS ONLY</div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// CLOCK
+// ══════════════════════════════════
+function tick(){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  const s=`${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`;
+  document.getElementById('clk').textContent=s;
+  document.getElementById('trajT').textContent=s;
+}
+setInterval(tick,1000);tick();
+
+// ══════════════════════════════════
+// PAGE SWITCHING
+// ══════════════════════════════════
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='satellite') initGlobe();
+  if(id==='analytics') initAnalytics();
+  if(id==='surveillance') initCams();
+}
+
+// ══════════════════════════════════
+// ACTIVITY FEED
+// ══════════════════════════════════
+const actData=[
+  {src:'OSINT',   col:'var(--teal)',   msg:'Entity <em>CHEN, M.</em> departure flag — ZRH airport biometric match confirmed',conf:'97%'},
+  {src:'FININT',  col:'var(--green)',  msg:'Wire transfer initiated: <em>CHF 847K</em> → Shell-BVI-4421 · Flagged AML',conf:'99%'},
+  {src:'SIGINT',  col:'var(--amber)',  msg:'Encrypted burst from device <em>DEV-4421</em> — 4 recipients identified',conf:'88%'},
+  {src:'ECON',    col:'var(--cyan)',   msg:'<em>ECB rate decision</em> due in 72h — CHF corridor capital flow acceleration',conf:'100%'},
+  {src:'TRAVEL',  col:'var(--text2)',  msg:'Passport scanned: <em>ZRH→DXB</em> booking confirmed +48h · Four Seasons',conf:'100%'},
+  {src:'CORPINT', col:'var(--purple)', msg:'New entity: <em>Silversand Holdings</em> — Geneva · beneficial owner masked',conf:'100%'},
+  {src:'HUMINT',  col:'var(--amber)',  msg:'Source reports <em>counterparty meeting</em> scheduled Dubai DIFC Thursday',conf:'72%'},
+  {src:'ECON',    col:'var(--cyan)',   msg:'<em>SNB intervention</em> signal — CHF/EUR weakening beyond intervention band',conf:'84%'},
+  {src:'CYBER',   col:'var(--red)',    msg:'Signal app installed on <em>DEV-0892</em> — encrypted messaging capability',conf:'91%'},
+  {src:'FININT',  col:'var(--green)',  msg:'Crypto wallet <em>0x7f3a...</em> received 12 ETH via mixer — pattern match',conf:'85%'},
+  {src:'GEO',     col:'var(--accent2)',msg:'<em>MENA corridor</em> border tension index +22% — watch list trigger',conf:'79%'},
+];
+let actIdx=0;
+const af=document.getElementById('actFeed');
+function pushAct(){
+  const d=actData[actIdx%actData.length];actIdx++;
+  const now=new Date(),p=n=>String(n).padStart(2,'0');
+  const t=`${p(now.getUTCHours())}:${p(now.getUTCMinutes())}:${p(now.getUTCSeconds())}`;
+  const row=document.createElement('div');row.className='act-row';
+  row.innerHTML=`<span class="act-t">${t}</span><span class="act-src" style="color:${d.col};background:${d.col}18;font-size:8px;padding:1px 4px;border-radius:2px;">${d.src}</span><span class="act-m">${d.msg}</span><span class="act-c">${d.conf}</span>`;
+  af.insertBefore(row,af.firstChild);
+  if(af.children.length>22)af.removeChild(af.lastChild);
+  const el=document.getElementById('kv1');
+  el.textContent=(parseInt(el.textContent.replace(',',''))+Math.floor(Math.random()*5+1)).toLocaleString();
+  const sb=document.getElementById('sb1');
+  sb.textContent=(parseInt(sb.textContent.replace(/,/g,''))+Math.floor(Math.random()*12+3)).toLocaleString();
+}
+setInterval(pushAct,1900);for(let i=0;i<12;i++)pushAct();
+
+// SYS CHART sparkline
+(function(){
+  const c=document.getElementById('sysChart');
+  if(!c)return;
+  function draw(){
+    c.width=c.offsetWidth||280;c.height=90;
+    const ctx=c.getContext('2d');
+    const pts=Array.from({length:50},(_,i)=>28+Math.sin(i*.35)*9+Math.random()*9);
+    drawSparkline(ctx,pts,c.width,c.height,'#3b82f6','rgba(59,130,246,0.08)');
+  }
+  draw();window.addEventListener('resize',draw);
+})();
+
+function drawSparkline(ctx,data,w,h,stroke,fill){
+  ctx.clearRect(0,0,w,h);
+  const mn=Math.min(...data),mx=Math.max(...data),rng=mx-mn||1;
+  const pts=data.map((v,i)=>({x:i/(data.length-1)*w,y:h-((v-mn)/rng)*(h-4)-2}));
+  ctx.strokeStyle='rgba(30,45,69,.6)';ctx.lineWidth=1;
+  [.25,.5,.75].forEach(f=>{ctx.beginPath();ctx.moveTo(0,f*h);ctx.lineTo(w,f*h);ctx.stroke();});
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+}
+
+// ══════════════════════════════════
+// INTEL FEED
+// ══════════════════════════════════
+const intelData=[
+  {src:'OSINT',  cls:'osint', msg:'Property registry <span>Silversand Holdings</span> — beneficial owner masked via Liechtenstein trust',conf:'100%',lvl:'hi'},
+  {src:'FININT', cls:'finint',msg:'Wire flagged: <span>CHF 847K</span> from Meridian Capital → BVI entity Shell-BVI-4421',conf:'99%',lvl:'hi'},
+  {src:'ECON',   cls:'econ',  msg:'ECB preliminary briefing: <span>rate hold expected</span> with hawkish forward guidance — CHF pressure',conf:'91%',lvl:'hi'},
+  {src:'SIGINT', cls:'sigint',msg:'Device cluster <span>DEV-4421, DEV-0892</span> co-located Bahnhofstr 12 — 22-min encrypted session',conf:'88%',lvl:'hi'},
+  {src:'GEO',    cls:'geo',   msg:'<span>MENA corridor</span> — Turkish-Syrian border increased military movement; energy corridor risk',conf:'82%',lvl:'md'},
+  {src:'ECON',   cls:'econ',  msg:'<span>Fed pivot signal</span> — dollar weakening accelerates; USDCHF breach 0.88 · capital flow shift',conf:'87%',lvl:'hi'},
+  {src:'HUMINT', cls:'humint',msg:'Source confirms meeting with <span>K. Al-Rashid</span> — Dubai DIFC Thu · capital structure topic',conf:'72%',lvl:'md'},
+  {src:'FININT', cls:'finint',msg:'Crypto mixer activity: wallet <span>0x7f3a...c221</span> — 12 ETH received from unattributed source',conf:'85%',lvl:'md'},
+  {src:'ECON',   cls:'econ',  msg:'<span>SNB intervention</span> considered — EUR/CHF approaching 0.94 floor; Vorort briefing leaked',conf:'78%',lvl:'md'},
+  {src:'OSINT',  cls:'osint', msg:'Corporate registry: <span>Meridian Capital SE</span> — filing amendment includes new offshore fund structure',conf:'100%',lvl:'hi'},
+  {src:'GEO',    cls:'geo',   msg:'<span>Gulf Cooperation Council</span> emergency session — UAE capital controls discussion confirmed',conf:'74%',lvl:'md'},
+  {src:'CYBER',  cls:'cyber', msg:'Signal app + VPN chained on <span>DEV-0892</span> — fingerprint evasion protocol detected',conf:'91%',lvl:'hi'},
+];
+let iiIdx=0;
+const iif=document.getElementById('intelFeed');
+function pushIntel(){
+  const d=intelData[iiIdx%intelData.length];iiIdx++;
+  const now=new Date(),p=n=>String(n).padStart(2,'0');
+  const t=`${p(now.getUTCHours())}:${p(now.getUTCMinutes())}`;
+  const row=document.createElement('div');row.className='irow';
+  row.innerHTML=`<span class="it">${t}</span><span class="isrc ${d.cls}">${d.src}</span><span class="im">${d.msg}</span><span class="ic ${d.lvl}">${d.conf}</span>`;
+  iif.insertBefore(row,iif.firstChild);
+  if(iif.children.length>30)iif.removeChild(iif.lastChild);
+}
+setInterval(pushIntel,2500);for(let i=0;i<12;i++)pushIntel();
+
+// AUDIO VIZ
+const as=document.getElementById('aScope');
+if(as){for(let i=0;i<60;i++){const b=document.createElement('div');b.className='sbar-b';b.style.height=(Math.random()*38+5)+'px';b.style.animationDuration=(Math.random()*.2+.07)+'s';b.style.animationDelay=(Math.random()*.12)+'s';as.appendChild(b);}}
+
+// TRANSCRIPT
+const txLines=[
+  {cls:'sa',tag:'SPEAKER A',txt:'The exposure in the eastern corridor needs to be redistributed before <span class="tk">quarterly review</span>. Cayman structure preferred — nothing traceable.',tags:['c:CONFIDENT','r:EVASIVE']},
+  {cls:'sb',tag:'SPEAKER B',txt:'Agreed. <span class="tk">Compliance window</span> closes Thursday. Singapore sign-off first — I\'ve confirmed with the Singapore side they are ready.',tags:['w:CAUTIOUS','r:URGENT']},
+  {cls:'sa',tag:'SPEAKER A',txt:'Marcus confirmed the <span class="tk">counterparty</span>. Dubai DIFC Thursday. Documentation clean — zero mapping back to the principal entity.',tags:['r:EVASIVE','w:INSTRUCTIVE']},
+  {cls:'sc',tag:'SPEAKER C',txt:'The <span class="tk">Geneva property</span> trustee needs updated instructions before Friday or the beneficial structure collapses under new disclosure regs.',tags:['w:CAUTIOUS','c:ANALYTICAL']},
+  {cls:'sb',tag:'SPEAKER B',txt:'Loop in the <span class="tk">third entity</span>? Reduces exposure if this faces scrutiny. We need the Liechtenstein layer operational by Monday.',tags:['g:COLLABORATIVE','w:STRATEGIC']},
+];
+let tidx=0;
+const txDiv=document.getElementById('txDiv');
+function pushTx(){
+  const t=txLines[tidx%txLines.length];tidx++;
+  const el=document.createElement('div');el.className='t-block';
+  const tgs=t.tags.map(tg=>{const[c,l]=tg.split(':');return`<span class="t-tag ${c}">${l}</span>`;}).join('');
+  el.innerHTML=`<div class="t-sp ${t.cls}">${t.tag}</div><div class="t-tx">${t.txt}</div><div class="t-tags">${tgs}</div>`;
+  txDiv.insertBefore(el,txDiv.firstChild);
+  if(txDiv.children.length>8)txDiv.removeChild(txDiv.lastChild);
+}
+setInterval(pushTx,5500);pushTx();pushTx();pushTx();
+
+// MACRO EVENTS BAND
+const macroEvents=[
+  {type:'ECON',col:'var(--cyan)',   label:'ECB RATE DECISION',     detail:'Expected hold 4.50% — hawkish forward guidance — CHF/EUR +0.8%',time:'72h'},
+  {type:'GEO', col:'var(--amber)',  label:'MENA BORDER TENSION',   detail:'Turkish-Syrian corridor military movement index +22% — energy risk',time:'ONGOING'},
+  {type:'FIN',  col:'var(--green)', label:'FED PIVOT SIGNAL',      detail:'USD weakening — USDCHF breach 0.88 — capital flow reallocation',time:'48h'},
+  {type:'ECON',col:'var(--cyan)',   label:'SNB INTERVENTION WATCH',detail:'EUR/CHF approaching 0.94 historical floor — SNB emergency meeting',time:'36h'},
+  {type:'GEO', col:'var(--amber)',  label:'GCC EMERGENCY SESSION', detail:'UAE capital controls discussion — Gulf financial sector risk elevated',time:'24h'},
+  {type:'ECON',col:'var(--cyan)',   label:'CHINESE PMI RELEASE',   detail:'Manufacturing PMI 48.2 vs 50.1 expected — Asia risk-off signal',time:'12h'},
+  {type:'FIN',  col:'var(--green)', label:'CRUDE OIL OPEC MEETING',detail:'Production cut extension debated — WTI $84/bbl resistance test',time:'5d'},
+];
+const mb=document.getElementById('macroBand');
+macroEvents.forEach(e=>{
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:flex-start;gap:9px;padding:7px 12px;border-bottom:1px solid var(--border);';
+  row.innerHTML=`<div style="font-family:var(--mono);font-size:7.5px;letter-spacing:1px;padding:2px 5px;border-radius:1px;background:${e.col}18;color:${e.col};border:1px solid ${e.col}44;white-space:nowrap;margin-top:1px;">${e.type}</div><div style="flex:1;"><div style="font-family:var(--cond);font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px;">${e.label}</div><div style="font-family:var(--mono);font-size:8.5px;color:var(--text3);">${e.detail}</div></div><div style="font-family:var(--mono);font-size:8px;color:${e.col};white-space:nowrap;">${e.time}</div>`;
+  mb.appendChild(row);
+});
+
+// ECON TICKER
+const tickerItems=[
+  ['EUR/CHF','0.9412','+0.18%','up'],['USD/CHF','0.8844','-0.22%','dn'],['SMI','11,842','+1.2%','up'],
+  ['ECB RATE','4.50%','Decision 72h','warn'],['GOLD','$2,341','+2.1%','up'],['WTI','$84.20','+0.8%','up'],
+  ['BTC/USD','62,441','+3.4%','up'],['VIX','21.4','ELEVATED','warn'],['CHF LIBOR','1.72%','-0.03%','dn'],
+  ['DAX','18,224','+0.9%','up'],['10Y BUND','2.41%','+4bp','dn'],['EUROSTOXX','4,891','+0.7%','up'],
+  ['DXY','104.2','-0.3%','dn'],['SNB RESERVE','$720B','Watch mode','warn'],['OIL SPREAD','$2.1/bbl','Brent-WTI',''],
+];
+const ticker=document.getElementById('econTicker');
+function buildTicker(){
+  const items=[...tickerItems,...tickerItems];
+  items.forEach(([lbl,val,chg,dir])=>{
+    const d=document.createElement('div');d.className='ticker-item';
+    const chgClass=dir==='up'?'ti-up':dir==='dn'?'ti-dn':dir==='warn'?'ti-dn':'';
+    d.innerHTML=`<span class="ti-label">${lbl}</span><span>${val}</span><span class="${chgClass}">${chg}</span>`;
+    ticker.appendChild(d);
+  });
+}
+buildTicker();
+
+// KEYWORD CLOUD
+const kws=[
+  {t:'Capital Flight',c:'var(--red)'},{t:'BVI Entity',c:'var(--amber)'},{t:'Compliance Window',c:'var(--accent2)'},
+  {t:'Counterparty',c:'var(--teal)'},{t:'Wire Transfer',c:'var(--amber)'},{t:'ECB Rate Decision',c:'var(--cyan)'},
+  {t:'Singapore Sign-off',c:'var(--text2)'},{t:'Shell Entity',c:'var(--red)'},{t:'SNB Intervention',c:'var(--cyan)'},
+  {t:'Cayman Structure',c:'var(--amber)'},{t:'Beneficial Owner',c:'var(--accent2)'},{t:'Encrypted Comms',c:'var(--purple)'},
+  {t:'Geneva Trust',c:'var(--text2)'},{t:'MENA Risk',c:'var(--accent2)'},{t:'Crypto Mixer',c:'var(--purple)'},
+];
+const kwd=document.getElementById('kwCloud');
+kws.forEach(k=>{
+  const el=document.createElement('div');
+  el.style.cssText=`font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:2px;color:${k.c};border:1px solid ${k.c}44;background:${k.c}11;`;
+  el.textContent=k.t;kwd.appendChild(el);
+});
+
+// MACRO TOASTS
+const toastData=[
+  {type:'econ',label:'ECON ALERT',msg:'ECB pre-meeting briefing leaked — rate hold with hawkish bias. CHF/EUR expected +0.5% open.'},
+  {type:'geo', label:'GEO ALERT', msg:'MENA corridor border incident logged — energy pipeline route at risk.'},
+  {type:'fin', label:'FIN ALERT', msg:'Unusual options flow detected on CHF futures — 3x normal volume pre-ECB decision.'},
+  {type:'econ',label:'MACRO FLAG',msg:'Chinese manufacturing PMI 48.2 — miss of 1.9pts — Asian markets risk-off trigger.'},
+  {type:'geo', label:'GEO FLAG',  msg:'UAE capital controls draft circulating — Gulf sovereign wealth repositioning expected.'},
+];
+let tIdx2=0;
+function pushToast(){
+  const d=toastData[tIdx2%toastData.length];tIdx2++;
+  const wrap=document.getElementById('macroToasts');
+  const el=document.createElement('div');el.className=`macro-toast ${d.type}`;
+  const colors={econ:'var(--cyan)',geo:'var(--amber)',fin:'var(--green)',sec:'var(--red)'};
+  const now=new Date(),p=n=>String(n).padStart(2,'0');
+  const t=`${p(now.getUTCHours())}:${p(now.getUTCMinutes())}:${p(now.getUTCSeconds())} UTC`;
+  el.innerHTML=`<div class="toast-type" style="color:${colors[d.type]};letter-spacing:1.5px;">◆ ${d.label}</div><div class="toast-msg">${d.msg}</div><div class="toast-time">${t}</div>`;
+  wrap.insertBefore(el,wrap.firstChild);
+  setTimeout(()=>{el.style.transition='opacity 0.5s';el.style.opacity='0';setTimeout(()=>el.remove(),500);},7000);
+  if(wrap.children.length>3)wrap.lastChild.remove();
+}
+// Only show toasts on intelligence page
+setInterval(()=>{if(document.getElementById('page-intelligence').classList.contains('active'))pushToast();},9000);
+setTimeout(()=>{if(document.getElementById('page-intelligence').classList.contains('active'))pushToast();},3000);
+
+// ══════════════════════════════════
+// ENTITIES
+// ══════════════════════════════════
+const entities=[
+  {id:'ARG-7741-C',name:'Chen, Marcus L.',role:'VP Emerging Markets · Meridian Capital',risk:'h',riskLabel:'HIGH RISK',img:'https://randomuser.me/api/portraits/men/45.jpg',
+   status:'PERSON OF INTEREST',interpol:false,warrant:false,
+   details:{dob:'1978-09-14',nat:'Swiss / HK (dual)',pass:'X7492881 (CH)',loc:'Zürich, CH',lastSeen:'14 min ago · CAM-001',devices:'4 associated',languages:'EN, DE, ZH, FR',assoc:'23 mapped',intercepts:'847 sessions',pattern:'94.2% — HIGH',employer:'Meridian Capital Ltd.',role:'VP, Emerging Markets',salary:'CHF 420K / yr',flagged:'CHF 4.2M',unexplained:'CHF 2.8M',wires:'22 flagged',crypto:'2 wallets detected',countries:'8 (90d)',flight:'ZRH→DXB +48h',behavior:'Counter-surveillance detected'},
+   tags:['Financial Crime','Capital Flight','Shell Entities','Travel Flag','Intercept Active','Biometric Tagged'],risk_score:74},
+  {id:'ARG-3312-B',name:'Al-Rashid, Khalid M.',role:'Director · Gulf Investments LLC',risk:'h',riskLabel:'HIGH RISK',img:'https://randomuser.me/api/portraits/men/52.jpg',
+   status:'ASSOCIATE — WATCH LIST',interpol:false,warrant:false,
+   details:{dob:'1975-03-22',nat:'UAE / Saudi',pass:'AE-4491002',loc:'Dubai, UAE',lastSeen:'2h ago · Airport CCTV',devices:'3 associated',languages:'AR, EN, FR',assoc:'31 mapped',intercepts:'214 sessions',pattern:'81.2% — HIGH',employer:'Gulf Investments LLC / DIFC',role:'Director',salary:'AED 3.2M / yr (est.)',flagged:'AED 22M',unexplained:'AED 14M',wires:'17 flagged',crypto:'1 wallet',countries:'12 (90d)',flight:'DXB local',behavior:'DIFC shell creation pattern'},
+   tags:['Shell Entities','Wire Fraud','Associate ARG-7741-C','DIFC Flag'],risk_score:81},
+  {id:'FUG-0091',name:'Petrov, Dimitri A.',role:'Former Gazprom Director · Sanctions Evader',risk:'w',riskLabel:'FUGITIVE',img:'https://randomuser.me/api/portraits/men/77.jpg',
+   status:'INTERPOL RED NOTICE',interpol:true,warrant:true,
+   details:{dob:'1969-11-08',nat:'Russian (revoked) · via Cyprus',pass:'MULTIPLE FORGED',loc:'UNKNOWN — last: Belgrade',lastSeen:'3 days ago · Serbia CCTV',devices:'Unknown — burner rotation',languages:'RU, EN, DE',assoc:'47 mapped',intercepts:'22 sessions (encrypted)',pattern:'67.4% — MEDIUM',employer:'Shell network · DP Investments',role:'Beneficial owner (masked)',salary:'N/A — Asset-based',flagged:'USD 340M',unexplained:'USD 290M',wires:'Sanctions evasion confirmed',crypto:'Multiple cold wallets',countries:'22 (24mo)',flight:'Private charters only',behavior:'Identity fraud · cover docs'},
+   tags:['INTERPOL RED NOTICE','Sanctions Evasion','Money Laundering','Forged Documents','Fugitive'],risk_score:97},
+  {id:'FUG-0044',name:'Salazar-Vega, Eduardo',role:'Cartel Finance Director — Los Cuervos',risk:'w',riskLabel:'FUGITIVE',img:'https://randomuser.me/api/portraits/men/33.jpg',
+   status:'DEA WANTED · INTERPOL RED',interpol:true,warrant:true,
+   details:{dob:'1981-06-14',nat:'Colombian / Venezuelan (dual)',pass:'MULTIPLE ALIASES',loc:'UNKNOWN — last: Medellin',lastSeen:'8 days ago · Colombia',devices:'Signal / Briar p2p',languages:'ES, EN, PT',assoc:'82 mapped',intercepts:'Limited — COMSEC trained',pattern:'59.1% — MEDIUM',employer:'Los Cuervos Cartel (finance arm)',role:'Treasurer / money launderer',salary:'USD 4M / yr (est.)',flagged:'USD 180M (est.)',unexplained:'USD 165M',wires:'TBML — trade-based laundering',crypto:'Monero confirmed',countries:'18 (active movement)',flight:'Light aircraft / maritime',behavior:'COMSEC trained · armed'},
+   tags:['DEA WANTED','INTERPOL RED','Narco Finance','TBML','Armed & Dangerous'],risk_score:99},
+  {id:'ARG-5521-A',name:'Vogel, Petra S.',role:'Legal Counsel · Silversand Holdings',risk:'m',riskLabel:'MED RISK',img:'https://randomuser.me/api/portraits/women/38.jpg',
+   status:'ASSOCIATE — MONITORING',interpol:false,warrant:false,
+   details:{dob:'1984-02-17',nat:'Swiss / Austrian',pass:'CH-8812203',loc:'Geneva, CH',lastSeen:'1d ago · Geneva Office',devices:'2 associated',languages:'DE, FR, EN, IT',assoc:'12 mapped',intercepts:'44 sessions',pattern:'71.3% — MEDIUM',employer:'Silversand Holdings · Own practice',role:'Managing Counsel',salary:'CHF 280K / yr',flagged:'CHF 340K',unexplained:'CHF 120K',wires:'4 flagged',crypto:'None detected',countries:'4 (90d)',flight:'Normal patterns',behavior:'Structure concealment legal cover'},
+   tags:['Legal Cover','Shell Entity Link','Associate ARG-7741-C'],risk_score:55},
+  {id:'FUG-0078',name:'Kim, Ji-Ho "Shadow"',role:'Cyber Criminal — State-Linked',risk:'w',riskLabel:'FUGITIVE',img:'https://randomuser.me/api/portraits/men/24.jpg',
+   status:'CISA WANTED · INTERPOL NOTICE',interpol:true,warrant:true,
+   details:{dob:'1990-04-03',nat:'DPRK (defected) · alt: PRC',pass:'MULTIPLE ALIASES',loc:'UNKNOWN — digital only',lastSeen:'Online: 6h ago',devices:'VPN chain + Tor',languages:'KO, ZH, EN, RU',assoc:'Network of 200+',intercepts:'Digital intercepts only',pattern:'82.7% — HIGH',employer:'APT-37 / Lazarus Group (DPRK-linked)',role:'Lead exploit developer',salary:'Crypto-paid',flagged:'USD 87M in crypto thefts',unexplained:'All assets hidden',wires:'Crypto bridges only',crypto:'BTC, XMR — multiple wallets',countries:'Digital nomad / 0 physical',flight:'Not applicable',behavior:'OPSEC expert — zero physical footprint'},
+   tags:['CISA WANTED','APT-37 DPRK','Crypto Theft','Ransomware','State Actor'],risk_score:92},
+  {id:'ARG-2210-D',name:'Leung, Thomas W.',role:'Director · Singapore Multi-Family Office',risk:'m',riskLabel:'MED RISK',img:'https://randomuser.me/api/portraits/men/67.jpg',
+   status:'ASSOCIATE — MONITORING',interpol:false,warrant:false,
+   details:{dob:'1977-08-29',nat:'Singaporean / British (dual)',pass:'SG-5541122',loc:'Singapore',lastSeen:'Yesterday · Raffles Hotel CCTV',devices:'3 associated',languages:'EN, ZH, MS',assoc:'18 mapped',intercepts:'91 sessions',pattern:'63.8% — MEDIUM',employer:'Leung MFO Pte Ltd',role:'Founder Director',salary:'SGD 800K / yr',flagged:'SGD 4.1M',unexplained:'SGD 2.8M',wires:'9 flagged',crypto:'Possible — unconfirmed',countries:'6 (90d)',flight:'SIN hub regular',behavior:'MFO as layering vehicle'},
+   tags:['MFO Layering','Singapore Hub','Associate ARG-7741-C'],risk_score:61},
+];
+
+const entList=document.getElementById('entList');
+entities.forEach((e,i)=>{
+  const row=document.createElement('div');
+  row.className='ent-row'+(i===0?' sel':'');
+  const interpol=e.interpol?`<span style="font-family:var(--mono);font-size:7px;background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25);border-radius:1px;padding:1px 4px;margin-left:4px;">INTERPOL</span>`:'';
+  row.innerHTML=`<img class="ent-av" src="${e.img}" onerror="this.style.background='var(--bg3)'"/><div class="ent-info"><div class="ent-name">${e.name}${interpol}</div><div class="ent-meta">${e.id} · ${e.role.substring(0,40)}</div></div><div class="ent-risk ${e.risk}">${e.riskLabel}</div>`;
+  row.onclick=()=>{document.querySelectorAll('.ent-row').forEach(r=>r.classList.remove('sel'));row.classList.add('sel');renderEntityDetail(e);};
+  entList.appendChild(row);
+});
+
+function renderEntityDetail(e){
+  const d=document.getElementById('entDetail');d.innerHTML='';
+  // Header
+  const hdr=document.createElement('div');hdr.style.cssText='background:var(--bg1);border-bottom:1px solid var(--border);flex:none;';
+  const interBadge=e.interpol?`<div class="badge alert">INTERPOL RED NOTICE</div>`:'';
+  const warrantBadge=e.warrant?`<div class="badge alert">ARREST WARRANT ACTIVE</div>`:'';
+  const statusColor=e.risk==='w'?'var(--red)':e.risk==='h'?'var(--amber)':'var(--accent2)';
+  hdr.innerHTML=`<div class="ph"><div class="ph-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Entity Profile — ${e.id}</div><div class="ph-b">${interBadge}${warrantBadge}<div class="badge" style="background:${statusColor}18;color:${statusColor};border:1px solid ${statusColor}44;">${e.status}</div></div></div><div class="pb"><div style="display:flex;gap:14px;align-items:flex-start;"><div class="prof-photo" style="border-color:${statusColor}66"><img src="${e.img}" onerror="this.style.background='var(--bg3)'"/></div><div style="flex:1;"><div class="prof-name">${e.name}</div><div class="prof-role">${e.role}</div><div style="font-family:var(--mono);font-size:8.5px;color:var(--text3);">ID: ${e.id}</div><div class="tag-list">${e.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div><div style="width:160px;flex-shrink:0;"><div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-bottom:3px;letter-spacing:1px;">RISK SCORE</div><div style="font-family:var(--mono);font-size:26px;color:${statusColor};margin-bottom:3px;">${e.risk_score}<span style="font-size:12px;color:var(--text3)">/100</span></div><div class="rbar-track"><div class="rbar-fill" style="width:${e.risk_score}%"></div></div><div style="font-family:var(--mono);font-size:8px;margin-top:3px;" class="${e.risk==='w'?'dtv danger':e.risk==='h'?'dtv flag':'dtv ok'}">${e.risk==='w'?'EXTREME — FUGITIVE':e.risk==='h'?'ELEVATED — ACTIVE INVEST.':'MODERATE — MONITORING'}</div></div></div></div>`;
+  d.appendChild(hdr);
+  // Body
+  const body=document.createElement('div');body.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);overflow:hidden;';
+  const dd=e.details;
+  const col=(title,rows)=>{
+    const p=document.createElement('div');p.className='panel';
+    p.innerHTML=`<div class="ph"><div class="ph-title">${title}</div></div><div class="pb" style="overflow-y:auto;">${rows.map(([k,v,cls])=>`<div class="dtrow"><span class="dtk">${k}</span><span class="dtv ${cls||''}">${v}</span></div>`).join('')}</div>`;
+    return p;
+  };
+  body.appendChild(col('Personal Data',[
+    ['Date of Birth',dd.dob||'—'],['Nationality',dd.nat||'—'],['Passport',dd.pass||'—','flag'],
+    ['Current Location',dd.loc||'—','flag'],['Last Observed',dd.lastSeen||'—'],
+    ['Devices',dd.devices||'—'],['Languages',dd.languages||'—'],
+    ['Associates',dd.assoc||'—','flag'],['Intercepts',dd.intercepts||'—'],['Pattern Match',dd.pattern||'—','danger'],
+  ]));
+  body.appendChild(col('Financial Intelligence',[
+    ['Employer',dd.employer||'—'],['Role',dd.role||'—'],['Salary (est.)',dd.salary||'—'],
+    ['Total Flagged',dd.flagged||'—','danger'],['Unexplained',dd.unexplained||'—','danger'],
+    ['Wire Transfers',dd.wires||'—','flag'],['Crypto',dd.crypto||'—','flag'],
+    ['Jurisdictions','Multiple offshore','flag'],
+  ]));
+  body.appendChild(col('Movement & Behavior',[
+    ['Countries / 90d',dd.countries||'—','flag'],['Pending Travel',dd.flight||'—','danger'],
+    ['Behavior',dd.behavior||'—','flag'],
+    ['Employer HQ',dd.employer||'—'],
+  ]));
+  d.appendChild(body);
+}
+renderEntityDetail(entities[0]);
+
+// ══════════════════════════════════
+// CAMERAS
+// ══════════════════════════════════
+const camDefs=[
+  {id:'CAM-001',loc:'Lobby North',status:'LIVE',cls:'ok',featured:true,ir:false,tint:[10,26,15],persons:3},
+  {id:'CAM-007',loc:'Conference B',status:'MOTION',cls:'mov',featured:false,ir:false,tint:[26,20,10],persons:2},
+  {id:'CAM-012',loc:'Parking L2',status:'TRACKING',cls:'trk',featured:false,ir:true,tint:[16,8,8],persons:1,alert:true},
+  {id:'CAM-019',loc:'Entrance East',status:'LIVE',cls:'ok',featured:false,ir:false,tint:[10,16,26],persons:1},
+  {id:'CAM-024',loc:'Server Room',status:'LIVE',cls:'ok',featured:false,ir:true,tint:[12,12,18],persons:0},
+  {id:'CAM-031',loc:'Stairwell A',status:'LIVE',cls:'ok',featured:false,ir:true,tint:[14,14,14],persons:1},
+  {id:'CAM-044',loc:'Roof Access',status:'LIVE',cls:'ok',featured:false,ir:true,tint:[10,12,14],persons:0},
+];
+let camsInited=false;
+function initCams(){
+  if(camsInited)return;camsInited=true;
+  const grid=document.getElementById('camGrid');
+  camDefs.forEach((c,i)=>{
+    const cell=document.createElement('div');
+    cell.className='cam-cell'+(c.featured?' featured':'')+(c.alert?' alert-c':'');
+    const cv=document.createElement('canvas');cv.className='cam-canvas';
+    const top=document.createElement('div');top.className='cam-top';
+    top.innerHTML=`<span class="cam-id">${c.id} · ${c.ir?'IR ':''}${new Date().toISOString().substring(0,10)}</span><span class="cam-rec"><span class="cam-rdot"></span>REC</span>`;
+    const bot=document.createElement('div');bot.className='cam-bot';
+    bot.innerHTML=`<span class="cam-loc">${c.loc}</span><span class="cam-stat ${c.cls}">${c.status}</span>`;
+    cell.appendChild(cv);cell.appendChild(top);cell.appendChild(bot);
+    // Detection boxes
+    if(i===0){addBox(cell,'did','top:22%;left:28%;width:19%;height:38%','ARG-7741-C 94.2%');addBox(cell,'did','top:28%;left:55%;width:16%;height:32%','ARG-3312-B');}
+    if(i===2){addBox(cell,'dtgt','top:18%;left:30%;width:22%;height:44%','TARGET — TRACKING');}
+    if(i===1){addBox(cell,'dunk','top:30%;left:12%;width:16%;height:30%','UNKNOWN-001');addBox(cell,'did','top:24%;left:58%;width:17%;height:34%','ARG-5521-A');}
+    grid.appendChild(cell);
+    renderCam(cv,c);
+  });
+  // Detection log
+  const dl=document.getElementById('detLog');
+  const dets=[
+    {t:'08:44',cam:'CAM-001',msg:'ARG-7741-C identified — 94.2% facial',col:'var(--accent2)'},
+    {t:'08:44',cam:'CAM-001',msg:'ARG-3312-B identified — 87.1%',col:'var(--accent2)'},
+    {t:'08:43',cam:'CAM-012',msg:'TRACKING initiated — primary target',col:'var(--red)'},
+    {t:'08:41',cam:'CAM-007',msg:'Motion — 2 persons, one unidentified',col:'var(--amber)'},
+    {t:'08:38',cam:'CAM-007',msg:'ARG-5521-A identified',col:'var(--accent2)'},
+    {t:'08:35',cam:'CAM-031',msg:'Emergency exit door event',col:'var(--amber)'},
+    {t:'08:29',cam:'CAM-019',msg:'Vehicle ZH 447 AB — plate match',col:'var(--amber)'},
+    {t:'08:18',cam:'CAM-024',msg:'Unauthorized access attempt',col:'var(--red)'},
+    {t:'08:06',cam:'CAM-001',msg:'Lobby cleared — no targets',col:'var(--text3)'},
+  ];
+  dets.forEach(d=>{
+    const row=document.createElement('div');row.style.cssText='padding:6px 12px;border-bottom:1px solid var(--border);';
+    row.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:1px;"><span style="font-family:var(--mono);font-size:8px;color:var(--text3);">${d.t}</span><span style="font-family:var(--mono);font-size:8px;color:${d.col};">${d.cam}</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--text);">${d.msg}</div>`;
+    dl.appendChild(row);
+  });
+}
+function addBox(cell,cls,style,label){
+  const b=document.createElement('div');b.className='det-box '+cls;b.style.cssText=style;
+  b.innerHTML=`<div class="det-lbl">${label}</div>`;cell.appendChild(b);
+}
+function renderCam(canvas,def){
+  function resize(){canvas.width=canvas.offsetWidth||320;canvas.height=canvas.offsetHeight||180;}
+  resize();
+  const ctx=canvas.getContext('2d');
+  // Initialize person positions
+  const people=[];
+  for(let i=0;i<def.persons;i++){
+    people.push({x:.15+Math.random()*.65,y:.45+Math.random()*.2,vx:(Math.random()-.5)*.0006,h:.18+Math.random()*.1,phase:Math.random()*Math.PI*2,w:.22+Math.random()*.06});
+  }
+  // Vehicle (parking cam)
+  const hasVehicle=def.id==='CAM-012';
+  let vehX=0.2;
+  let t=Math.random()*1000;
+  let noiseFrame=[];
+
+  function buildNoise(w,h){
+    const arr=[];
+    for(let i=0;i<80;i++)arr.push([Math.random()*w,Math.random()*h,Math.random()*.07]);
+    return arr;
+  }
+
+  function draw(){
+    t+=.016;
+    const w=canvas.width,h=canvas.height;
+    if(!w||!h){requestAnimationFrame(draw);return;}
+    if(!noiseFrame.length)noiseFrame=buildNoise(w,h);
+
+    // ── Base background ──
+    const [br,bg,bb]=def.tint;
+    ctx.fillStyle=`rgb(${br},${bg},${bb})`;
+    ctx.fillRect(0,0,w,h);
+
+    // ── Environment (floor, perspective lines) ──
+    const floorY=h*.62;
+    // Gradient ground
+    const grd=ctx.createLinearGradient(0,floorY,0,h);
+    grd.addColorStop(0,`rgba(${br+10},${bg+10},${bb+10},0.5)`);
+    grd.addColorStop(1,`rgba(${br+4},${bg+4},${bb+4},0)`);
+    ctx.fillStyle=grd;ctx.fillRect(0,floorY,w,h-floorY);
+    // Floor line
+    ctx.strokeStyle=`rgba(255,255,255,0.07)`;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,floorY);ctx.lineTo(w,floorY);ctx.stroke();
+    // Perspective vanishing lines
+    const vp={x:w*.5,y:h*.45};
+    [[0,h],[w,h],[w*.3,floorY],[w*.7,floorY]].forEach(([lx,ly])=>{
+      ctx.beginPath();ctx.moveTo(vp.x,vp.y);ctx.lineTo(lx,ly);
+      ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.stroke();
+    });
+    // Wall line if server room
+    if(def.ir){
+      ctx.strokeStyle='rgba(255,255,255,0.05)';
+      ctx.strokeRect(w*.05,h*.1,w*.9,h*.55);
+    }
+
+    // ── Vehicle (parking cam) ──
+    if(hasVehicle){
+      vehX+=.0003;if(vehX>0.9)vehX=0.0;
+      const vx=vehX*w,vy=floorY-h*.12,vw=w*.22,vh=h*.1;
+      ctx.fillStyle='rgba(60,60,70,0.85)';
+      ctx.beginPath();ctx.roundRect(vx,vy,vw,vh,3);ctx.fill();
+      // headlights
+      ctx.fillStyle='rgba(255,240,200,0.7)';
+      ctx.beginPath();ctx.ellipse(vx+vw*.06,vy+vh*.4,vw*.04,vh*.25,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(vx+vw*.94,vy+vh*.4,vw*.04,vh*.25,0,0,Math.PI*2);ctx.fill();
+      // red tail lights
+      ctx.fillStyle='rgba(255,60,60,0.6)';
+      ctx.fillRect(vx+1,vy+vh*.25,vw*.04,vh*.25);
+      ctx.fillRect(vx+vw-.05*vw,vy+vh*.25,vw*.04,vh*.25);
+    }
+
+    // ── People silhouettes ──
+    people.forEach(p=>{
+      p.x+=p.vx;if(p.x<.05||p.x>.9)p.vx*=-1;
+      const px=p.x*w,py=p.y*h,ph=p.h*h,pw=p.w*ph;
+      const walk=Math.sin(t*2.8+p.phase)*.12*ph;
+      // IR warm body or normal silhouette
+      const bodyColor=def.ir?`rgba(220,245,220,0.6)`:`rgba(190,190,200,0.55)`;
+      // Head
+      ctx.fillStyle=bodyColor;
+      ctx.beginPath();ctx.ellipse(px,py-ph*.9,pw*.28,pw*.28,0,0,Math.PI*2);ctx.fill();
+      // Torso
+      ctx.fillRect(px-pw*.3,py-ph*.8,pw*.6,ph*.45);
+      // Legs
+      ctx.fillRect(px-pw*.28,py-ph*.35,pw*.22,ph*.35+walk);
+      ctx.fillRect(px+pw*.06,py-ph*.35,pw*.22,ph*.35-walk);
+      // Arms swing
+      ctx.fillRect(px-pw*.44,py-ph*.72,pw*.12,ph*.32-walk*.5);
+      ctx.fillRect(px+pw*.32,py-ph*.72,pw*.12,ph*.32+walk*.5);
+    });
+
+    // ── Noise grain (realistic CCD noise) ──
+    if(Math.random()>.85)noiseFrame=buildNoise(w,h);
+    noiseFrame.forEach(([nx,ny,nb])=>{ctx.fillStyle=`rgba(255,255,255,${nb})`;ctx.fillRect(nx,ny,1,1);});
+
+    // ── IR vignette ──
+    if(def.ir){
+      const vig=ctx.createRadialGradient(w*.5,h*.5,h*.15,w*.5,h*.5,h*.8);
+      vig.addColorStop(0,'transparent');vig.addColorStop(1,'rgba(0,0,0,.55)');
+      ctx.fillStyle=vig;ctx.fillRect(0,0,w,h);
+    }
+
+    // ── Scanline pass (horizontal lines for realism) ──
+    for(let sy=0;sy<h;sy+=3){
+      ctx.fillStyle='rgba(0,0,0,0.04)';ctx.fillRect(0,sy,w,1);
+    }
+
+    // ── Compression artifacts (occasional) ──
+    if(Math.random()>.97){
+      const ay=Math.random()*h;
+      ctx.fillStyle=`rgba(${def.tint[0]+30},${def.tint[1]+30},${def.tint[2]+30},0.15)`;
+      ctx.fillRect(0,ay,w,Math.random()*4+1);
+    }
+
+    // ── Timestamp ──
+    const now=new Date();
+    const ts=`${now.toISOString().replace('T',' ').substring(0,19)}`;
+    ctx.font=`${def.featured?10:8}px 'IBM Plex Mono',monospace`;
+    ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fillText(ts,5,h-5);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',()=>{canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;});
+}
+initCams();
+
+// ══════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════
+let analyticsInited=false;
+function initAnalytics(){
+  if(analyticsInited)return;analyticsInited=true;
+  setTimeout(()=>{
+    drawTrend();drawRadar();drawNet();drawMacroChart();
+  },50);
+}
+function drawTrend(){
+  const c=document.getElementById('trendChart');if(!c)return;
+  c.width=c.offsetWidth||400;c.height=c.offsetHeight||200;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  const series=[
+    {d:Array.from({length:30},(_,i)=>25+Math.sin(i*.4)*15+Math.random()*10+i*1.2),col:'#3b82f6',lbl:'Threat Level'},
+    {d:Array.from({length:30},(_,i)=>40+Math.sin(i*.3+1)*20+Math.random()*12),col:'#f59e0b',lbl:'Financial Activity'},
+    {d:Array.from({length:30},(_,i)=>18+Math.sin(i*.7+2)*12+Math.random()*8),col:'#ef4444',lbl:'Security Events'},
+    {d:Array.from({length:30},(_,i)=>30+Math.sin(i*.5+.5)*10+Math.random()*8),col:'#06b6d4',lbl:'Macro Volatility'},
+  ];
+  const all=series.flatMap(s=>s.d),mn=Math.min(...all)-5,mx=Math.max(...all)+5,rng=mx-mn;
+  const pad={l:35,r:10,t:10,b:30};
+  const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  // Grid
+  ctx.strokeStyle='rgba(30,45,69,.6)';ctx.lineWidth=1;ctx.font='8px IBM Plex Mono,monospace';ctx.fillStyle='rgba(61,80,104,.8)';
+  [0,.25,.5,.75,1].forEach(f=>{
+    const y=pad.t+ph*(1-f);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
+    ctx.fillText(Math.round(mn+rng*f),2,y+3);
+  });
+  // Day labels
+  ctx.fillStyle='rgba(61,80,104,.7)';
+  [0,7,14,21,29].forEach(i=>{
+    const x=pad.l+i/29*pw;ctx.fillText(`D${i+1}`,x-5,h-4);
+  });
+  // Series
+  series.forEach(s=>{
+    const pts=s.d.map((v,i)=>({x:pad.l+i/29*pw,y:pad.t+ph*(1-(v-mn)/rng)}));
+    // Fill
+    ctx.beginPath();ctx.moveTo(pts[0].x,pad.t+ph);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[29].x,pad.t+ph);ctx.closePath();
+    ctx.fillStyle=s.col+'18';ctx.fill();
+    // Line
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle=s.col;ctx.lineWidth=1.5;ctx.stroke();
+  });
+  // Legend
+  series.forEach((s,i)=>{
+    ctx.fillStyle=s.col;ctx.fillRect(pad.l+i*120,h-14,14,2);
+    ctx.fillStyle='rgba(122,144,176,.9)';ctx.fillText(s.lbl,pad.l+i*120+18,h-8);
+  });
+}
+
+function drawRadar(){
+  const c=document.getElementById('radarChart');if(!c)return;
+  c.width=c.offsetWidth||340;c.height=c.offsetHeight||200;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  const cx=w*.42,cy=h*.5,R=Math.min(w,h)*.36;
+  const axes=[
+    {lbl:'Offshore\nAccounts',val:.88},
+    {lbl:'Shell\nEntities',val:.74},
+    {lbl:'Crypto\nExposure',val:.55},
+    {lbl:'Property\nHoldings',val:.68},
+    {lbl:'Wire\nFrequency',val:.82},
+    {lbl:'Intercept\nDensity',val:.91},
+    {lbl:'Travel\nRisk',val:.78},
+    {lbl:'Associate\nNetwork',val:.72},
+  ];
+  const n=axes.length;
+  const angle=i=>-Math.PI/2+i/n*Math.PI*2;
+  // Web grid
+  [.25,.5,.75,1].forEach(f=>{
+    ctx.beginPath();
+    axes.forEach((_,i)=>{const a=angle(i);ctx.lineTo(cx+Math.cos(a)*R*f,cy+Math.sin(a)*R*f);});
+    ctx.closePath();ctx.strokeStyle='rgba(30,45,69,.8)';ctx.lineWidth=1;ctx.stroke();
+  });
+  // Spokes
+  axes.forEach((_,i)=>{
+    const a=angle(i);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+    ctx.strokeStyle='rgba(30,45,69,.6)';ctx.lineWidth=1;ctx.stroke();
+  });
+  // Data polygon — ARG-7741-C
+  ctx.beginPath();
+  axes.forEach((ax,i)=>{const a=angle(i);ctx.lineTo(cx+Math.cos(a)*R*ax.val,cy+Math.sin(a)*R*ax.val);});
+  ctx.closePath();ctx.fillStyle='rgba(239,68,68,0.18)';ctx.fill();ctx.strokeStyle='rgba(239,68,68,0.8)';ctx.lineWidth=2;ctx.stroke();
+  // Dots
+  axes.forEach((ax,i)=>{
+    const a=angle(i);const px=cx+Math.cos(a)*R*ax.val,py=cy+Math.sin(a)*R*ax.val;
+    ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fillStyle='#ef4444';ctx.fill();
+  });
+  // Labels
+  ctx.font='8px IBM Plex Mono,monospace';ctx.fillStyle='rgba(122,144,176,0.9)';ctx.textAlign='center';
+  axes.forEach((ax,i)=>{
+    const a=angle(i);const lx=cx+Math.cos(a)*(R+20),ly=cy+Math.sin(a)*(R+22);
+    ax.lbl.split('\n').forEach((line,li)=>{ctx.fillText(line,lx,ly+li*11);});
+    // value
+    const vx=cx+Math.cos(a)*R*ax.val,vy=cy+Math.sin(a)*R*ax.val;
+    ctx.fillStyle='rgba(239,68,68,.9)';ctx.font='7px IBM Plex Mono,monospace';
+    ctx.fillText(Math.round(ax.val*100)+'%',vx+(Math.cos(a)*12),vy+(Math.sin(a)*12));
+    ctx.fillStyle='rgba(122,144,176,0.9)';ctx.font='8px IBM Plex Mono,monospace';
+  });
+  ctx.textAlign='left';
+  // Legend
+  ctx.fillStyle='rgba(239,68,68,.7)';ctx.fillRect(w*.72,h*.05,14,2);
+  ctx.fillStyle='rgba(122,144,176,.8)';ctx.font='8px IBM Plex Mono,monospace';
+  ctx.fillText('ARG-7741-C',w*.72+18,h*.05+5);
+  ctx.fillStyle='rgba(61,80,104,.6)';ctx.fillText('Risk threshold',w*.72+18,h*.05+16);
+}
+
+function drawNet(){
+  const c=document.getElementById('netChart');if(!c)return;
+  c.width=c.offsetWidth||380;c.height=c.offsetHeight||240;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  const cx=w*.5,cy=h*.5;
+  const nodes=[
+    {x:cx,y:cy,r:9,col:'#ef4444',lbl:'ARG-7741-C',anchor:true},
+    ...['Al-Rashid K.','Vogel P.','Leung T.','Shell-BVI','Silversand','Cayman LP','Crypto W.'].map((l,i)=>{
+      const a=i/7*Math.PI*2;return{x:cx+Math.cos(a)*90,y:cy+Math.sin(a)*90,r:5,col:['#f59e0b','#8b5cf6','#3b82f6','#ef4444','#ef4444','#ef4444','#8b5cf6'][i],lbl:l};
+    }),
+    ...Array.from({length:14},(_,i)=>{
+      const a=i/14*Math.PI*2+.2;const d=140+Math.random()*20;
+      return{x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d,r:3.5,col:['#3b82f6','#f59e0b','#14b8a6','#8b5cf6'][i%4],lbl:''};
+    }),
+  ];
+  // Edges
+  nodes.slice(1,8).forEach(n=>{ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(n.x,n.y);ctx.strokeStyle='rgba(239,68,68,0.2)';ctx.lineWidth=1;ctx.stroke();});
+  nodes.slice(8).forEach((n,i)=>{const base=nodes[1+i%7];ctx.beginPath();ctx.moveTo(base.x,base.y);ctx.lineTo(n.x,n.y);ctx.strokeStyle='rgba(59,130,246,0.1)';ctx.lineWidth=.5;ctx.stroke();});
+  // Nodes
+  nodes.forEach(n=>{
+    ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=n.col+'33';ctx.fill();ctx.strokeStyle=n.col;ctx.lineWidth=n.anchor?2:1.5;ctx.stroke();
+    if(n.lbl){ctx.fillStyle='rgba(201,214,232,.75)';ctx.font=`8px IBM Plex Mono,monospace`;ctx.fillText(n.lbl,n.x+n.r+3,n.y+3);}
+  });
+}
+
+function drawMacroChart(){
+  const c=document.getElementById('macroChart');if(!c)return;
+  c.width=c.offsetWidth||300;c.height=120;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  const series=[
+    {d:Array.from({length:20},(_,i)=>0.93+Math.sin(i*.6)*.02+Math.random()*.01),col:'#3b82f6',lbl:'EUR/CHF'},
+    {d:Array.from({length:20},(_,i)=>0.88-i*.001+Math.sin(i*.4)*.01+Math.random()*.008),col:'#ef4444',lbl:'USD/CHF'},
+    {d:Array.from({length:20},(_,i)=>2300+i*8+Math.sin(i*.7)*40+Math.random()*20),col:'#f59e0b',lbl:'Gold (÷100)'},
+  ];
+  series.forEach((s,si)=>{
+    const mn=Math.min(...s.d),mx=Math.max(...s.d),rng=mx-mn||.01;
+    const pts=s.d.map((v,i)=>({x:i/(s.d.length-1)*w,y:h-30-((v-mn)/rng)*(h-40)}));
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.strokeStyle=s.col;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle=s.col;ctx.fillRect(si*90+4,h-18,12,2);
+    ctx.fillStyle='rgba(122,144,176,.8)';ctx.font='8px IBM Plex Mono,monospace';ctx.fillText(s.lbl,si*90+20,h-12);
+  });
+}
+
+// ══════════════════════════════════
+// GLOBE
+// ══════════════════════════════════
+// Detailed continent outlines as [lat, lon] pairs
+const CONTINENTS=[
+  // North America
+  {col:'#1e4a30',stroke:'#2d6b45',pts:[
+    [71,-156],[70,-141],[68,-136],[60,-137],[59,-136],[57,-134],[58,-136],[57,-135],[56,-130],[54,-130],[50,-128],[48,-124],[46,-124],[42,-124],[36,-122],[34,-120],[32,-117],[30,-115],[28,-110],[26,-110],[24,-108],[22,-106],[20,-105],[18,-104],[17,-100],[16,-94],[16,-88],[16,-86],[16,-84],[19,-87],[21,-87],[21,-90],[19,-90],[17,-88],[16,-89],[16,-87],[17,-83],[11,-83],[10,-83],[9,-79],[9,-78],[9,-77],[9,-76],[10,-75],[11,-74],[12,-72],[12,-71],[15,-69],[18,-67],[19,-70],[18,-72],[19,-74],[21,-75],[23,-75],[25,-77],[26,-79],[28,-80],[30,-80],[32,-81],[33,-79],[34,-78],[36,-76],[37,-76],[38,-75],[39,-74],[41,-74],[41,-70],[42,-70],[44,-68],[45,-67],[47,-68],[47,-70],[46,-72],[45,-74],[43,-76],[44,-78],[43,-79],[43,-79],[44,-81],[43,-82],[44,-83],[46,-84],[46,-86],[48,-87],[48,-84],[49,-83],[50,-81],[51,-80],[51,-78],[53,-78],[55,-76],[57,-76],[59,-74],[61,-74],[63,-75],[64,-78],[64,-82],[63,-85],[62,-89],[60,-94],[58,-94],[57,-92],[58,-88],[60,-82],[60,-78],[61,-72],[62,-68],[63,-68],[64,-65],[65,-65],[66,-62],[68,-58],[68,-55],[70,-54],[71,-56],[72,-56],[73,-60],[74,-62],[75,-64],[76,-68],[76,-72],[75,-76],[74,-80],[74,-84],[74,-90],[72,-96],[71,-100],[70,-104],[70,-108],[71,-114],[71,-120],[71,-130],[71,-140],[71,-156]
+  ]},
+  // Greenland (separate)
+  {col:'#1a3d28',stroke:'#2a5a3a',pts:[
+    [60,-44],[62,-43],[64,-40],[66,-38],[68,-36],[72,-30],[74,-24],[76,-20],[78,-20],[80,-22],[82,-25],[82,-30],[80,-35],[78,-38],[76,-40],[74,-44],[72,-46],[70,-48],[68,-50],[66,-52],[64,-52],[62,-48],[60,-44]
+  ]},
+  // South America
+  {col:'#1e4a30',stroke:'#2d6b45',pts:[
+    [12,-71],[11,-74],[10,-75],[9,-76],[9,-77],[8,-77],[7,-77],[6,-76],[5,-76],[5,-73],[4,-71],[3,-68],[2,-67],[1,-66],[0,-65],[-1,-65],[-2,-64],[-4,-62],[-5,-60],[-6,-58],[-8,-55],[-8,-53],[-7,-50],[-5,-47],[-3,-42],[-2,-40],[-3,-38],[-5,-35],[-8,-35],[-10,-37],[-12,-38],[-14,-39],[-16,-39],[-18,-39],[-20,-40],[-22,-42],[-24,-43],[-26,-48],[-28,-49],[-30,-50],[-32,-52],[-34,-54],[-36,-56],[-38,-57],[-40,-62],[-42,-64],[-44,-66],[-46,-66],[-48,-66],[-50,-68],[-52,-68],[-54,-68],[-56,-68],[-55,-66],[-53,-64],[-51,-60],[-50,-58],[-48,-56],[-46,-52],[-44,-48],[-42,-44],[-40,-40],[-38,-36],[-36,-34],[-34,-32],[-32,-30],[-30,-28],[-28,-26],[-26,-22],[-24,-20],[-22,-18],[-20,-16],[-18,-14],[-16,-12],[-14,-10],[-12,-8],[-10,-6],[-8,-4],[-6,-2],[-4,0],[-2,2],[0,4],[2,6],[4,8],[6,10],[8,12],[10,14],[12,-71]
+  ]},
+  // South America (proper, less distorted)
+  {col:'#1e4a30',stroke:'#2d6b45',pts:[
+    [12,-72],[11,-73],[10,-74],[9,-76],[8,-77],[7,-77],[6,-76],[5,-75],[3,-70],[2,-67],[0,-65],[-2,-63],[-4,-61],[-6,-58],[-8,-55],[-8,-53],[-6,-49],[-5,-45],[-3,-41],[-2,-39],[-4,-37],[-6,-35],[-8,-35],[-10,-37],[-12,-38],[-14,-39],[-16,-39],[-18,-39],[-20,-40],[-23,-43],[-26,-48],[-28,-49],[-30,-50],[-33,-52],[-35,-55],[-38,-57],[-40,-62],[-42,-64],[-44,-66],[-46,-66],[-48,-66],[-50,-68],[-52,-68],[-54,-68],[-56,-68],[-55,-66],[-53,-64],[-52,-60],[-50,-57],[-48,-55],[-46,-51],[-44,-46],[-42,-42],[-40,-38],[-36,-34],[-32,-31],[-26,-22],[-20,-16],[-14,-10],[-8,-4],[-4,0],[0,5],[4,8],[8,12],[12,-72]
+  ]},
+  // Europe
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [71,28],[70,25],[68,20],[65,15],[62,5],[60,5],[58,5],[57,8],[56,10],[54,10],[54,12],[53,14],[54,18],[54,20],[55,22],[56,24],[57,25],[59,28],[60,28],[60,25],[61,24],[62,24],[63,26],[64,26],[65,26],[66,26],[68,28],[70,30],[71,28]
+  ]},
+  // Europe (Iberian/France/Italy detail)
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [44,0],[44,-2],[43,-4],[43,-8],[40,-8],[38,-8],[36,-8],[36,-6],[37,-4],[37,0],[38,2],[40,4],[42,4],[44,2],[44,0]
+  ]},
+  // Scandinavia
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [58,5],[56,8],[56,10],[58,12],[60,12],[62,10],[64,12],[66,14],[68,16],[70,18],[72,22],[71,26],[70,28],[68,26],[66,24],[64,22],[62,20],[60,18],[58,16],[56,14],[56,10],[58,5]
+  ]},
+  // Africa
+  {col:'#3a2a0a',stroke:'#5a4010',pts:[
+    [37,10],[36,10],[35,12],[34,14],[32,14],[30,14],[28,15],[26,16],[24,15],[22,14],[20,13],[18,14],[16,13],[14,13],[12,14],[10,15],[8,14],[6,12],[4,10],[2,10],[0,10],[-2,10],[-4,12],[-6,12],[-8,14],[-10,16],[-12,18],[-14,16],[-16,14],[-18,12],[-20,14],[-22,16],[-24,18],[-26,16],[-28,16],[-30,16],[-32,18],[-34,20],[-34,26],[-34,28],[-32,28],[-30,28],[-28,30],[-26,32],[-24,34],[-22,34],[-20,34],[-18,32],[-16,32],[-14,34],[-12,36],[-10,38],[-8,40],[-6,40],[-4,40],[-2,40],[0,40],[2,40],[4,40],[6,40],[8,40],[10,38],[12,36],[14,34],[16,32],[18,32],[20,32],[22,32],[24,30],[26,30],[28,28],[30,26],[32,24],[34,22],[36,20],[37,18],[37,14],[37,10]
+  ]},
+  // Africa corrected
+  {col:'#3a2a0a',stroke:'#5a4010',pts:[
+    [37,10],[35,10],[30,12],[26,15],[20,14],[14,13],[10,15],[6,12],[2,10],[-2,10],[-4,12],[-8,14],[-12,18],[-20,14],[-26,16],[-30,16],[-34,20],[-34,26],[-30,28],[-26,32],[-22,34],[-18,32],[-12,36],[-8,40],[-4,40],[0,40],[4,40],[8,40],[12,36],[16,32],[20,32],[24,30],[28,28],[32,24],[36,20],[37,14],[37,10]
+  ]},
+  // Asia (main)
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [70,32],[68,32],[65,30],[62,30],[60,28],[57,28],[54,26],[50,28],[46,30],[42,30],[38,28],[35,26],[32,24],[30,22],[28,20],[26,18],[24,16],[22,14],[20,12],[18,10],[16,8],[14,6],[12,4],[10,6],[8,8],[6,10],[4,12],[6,14],[8,16],[10,18],[12,20],[14,22],[16,24],[18,26],[20,28],[22,30],[24,32],[26,34],[28,36],[30,38],[32,40],[34,42],[36,44],[38,46],[40,48],[42,50],[44,52],[46,54],[48,56],[50,58],[52,60],[54,62],[56,64],[58,66],[60,68],[62,70],[64,72],[66,74],[68,76],[70,78],[72,80],[74,82],[72,88],[70,92],[68,96],[66,100],[65,104],[64,108],[63,112],[62,116],[60,120],[58,124],[56,128],[54,132],[52,136],[50,140],[48,144],[46,148],[44,144],[42,140],[40,136],[38,132],[36,128],[34,124],[32,120],[30,116],[28,112],[26,108],[24,104],[22,100],[20,96],[18,92],[16,88],[14,84],[12,80],[10,76],[8,72],[6,68],[4,64],[2,60],[0,56],[2,52],[4,48],[6,44],[8,40],[10,36],[12,32],[14,28],[16,24],[18,20],[20,16],[22,12],[24,8],[26,4],[28,0],[30,-4],[32,-8],[34,-12],[36,-14],[38,-12],[40,-8],[42,-4],[44,0],[46,4],[48,8],[50,12],[52,16],[54,20],[56,24],[58,26],[60,28],[62,28],[64,28],[66,30],[68,30],[70,32]
+  ]},
+  // Asia simplified
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [70,30],[65,28],[60,28],[55,26],[50,26],[45,28],[40,30],[35,26],[30,22],[26,18],[22,14],[18,10],[14,6],[10,6],[8,10],[10,18],[14,22],[18,26],[22,30],[26,34],[30,38],[35,42],[40,48],[45,54],[50,58],[55,62],[60,68],[65,74],[70,78],[72,80],[70,90],[68,96],[65,104],[63,112],[60,120],[57,124],[54,132],[50,140],[48,144],[44,140],[40,132],[36,124],[32,116],[28,108],[24,100],[20,92],[16,84],[12,76],[8,68],[4,60],[2,52],[6,44],[10,36],[14,28],[18,20],[22,12],[26,4],[30,-4],[35,-12],[38,-12],[42,-4],[46,4],[50,12],[54,20],[58,26],[62,28],[66,30],[70,30]
+  ]},
+  // Japan / Korean peninsula area (simplified)
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [44,131],[42,130],[40,128],[36,128],[34,130],[36,132],[38,132],[40,130],[42,130],[44,132],[44,131]
+  ]},
+  // Australia
+  {col:'#2a1a08',stroke:'#4a3010',pts:[
+    [-14,130],[-16,136],[-18,138],[-20,140],[-22,143],[-24,144],[-26,144],[-28,144],[-30,144],[-32,144],[-34,144],[-36,144],[-38,143],[-38,140],[-36,138],[-34,136],[-34,134],[-35,132],[-34,120],[-32,116],[-30,114],[-28,114],[-26,114],[-24,114],[-22,112],[-20,118],[-18,122],[-16,126],[-14,130]
+  ]},
+  // New Zealand (tiny)
+  {col:'#2a1a08',stroke:'#4a3010',pts:[
+    [-36,174],[-38,176],[-42,174],[-44,172],[-46,170],[-44,168],[-42,170],[-40,172],[-38,174],[-36,174]
+  ]},
+  // Southeast Asia (peninsula)
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [22,98],[20,98],[18,100],[16,100],[14,100],[12,100],[10,102],[8,104],[4,104],[2,104],[0,104],[2,106],[4,108],[6,110],[8,112],[10,112],[12,110],[14,108],[16,106],[18,104],[20,102],[22,98]
+  ]},
+  // Indian subcontinent
+  {col:'#1e3a50',stroke:'#2a5470',pts:[
+    [26,66],[24,68],[22,68],[20,66],[18,66],[16,74],[14,76],[12,78],[10,78],[8,78],[8,80],[10,82],[12,80],[14,80],[16,82],[18,82],[20,80],[22,72],[24,70],[26,68],[28,66],[26,66]
+  ]},
+  // Madagascar
+  {col:'#3a2a0a',stroke:'#5a4010',pts:[
+    [-12,50],[-14,50],[-16,48],[-18,46],[-20,46],[-22,46],[-24,46],[-25,46],[-24,48],[-22,48],[-20,48],[-18,50],[-16,50],[-14,52],[-12,50]
+  ]},
+];
+
+let globeInited=false;
+function initGlobe(){
+  if(globeInited)return;globeInited=true;
+  const canvas=document.getElementById('globeCanvas');
+  const ctx=canvas.getContext('2d');
+  let rot=0,isDragging=false,lastX=0,zoom=1.0;
+  const events=[
+    {lat:24.4,lon:54.4,label:'Abu Dhabi — Subject Meeting',sev:'crit'},
+    {lat:47.4,lon:8.5,label:'Zürich — ARG-7741-C Last Location',sev:'crit'},
+    {lat:1.3,lon:103.8,label:'Singapore — Capital Transfer Hub',sev:'high'},
+    {lat:22.3,lon:114.2,label:'Hong Kong — Shell Entity Registry',sev:'high'},
+    {lat:51.5,lon:-0.1,label:'London — Counterparty Activity',sev:'med'},
+    {lat:48.9,lon:2.3,label:'Paris — Intelligence Node',sev:'med'},
+    {lat:40.7,lon:-74.0,label:'New York — Wire Origin',sev:'med'},
+    {lat:55.7,lon:37.6,label:'Moscow — SIGINT Collection',sev:'high'},
+    {lat:30.0,lon:31.2,label:'Cairo — Travel Intercept',sev:'med'},
+    {lat:35.7,lon:139.7,label:'Tokyo — APT Activity Logged',sev:'high'},
+    {lat:-33.9,lon:18.4,label:'Cape Town — Intelligence Asset',sev:'low'},
+    {lat:25.2,lon:55.3,label:'Dubai DIFC — Scheduled Meeting',sev:'crit'},
+  ];
+  // Populate event list
+  const evList=document.getElementById('evList');
+  const scolors={crit:'var(--red)',high:'var(--amber)',med:'var(--accent2)',low:'var(--teal)'};
+  events.forEach(e=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;';
+    d.innerHTML=`<div style="width:7px;height:7px;border-radius:50%;background:${scolors[e.sev]};box-shadow:0 0 5px ${scolors[e.sev]};flex-shrink:0;margin-top:3px;"></div><div style="flex:1;"><div style="font-family:var(--cond);font-size:10.5px;font-weight:600;color:var(--text);margin-bottom:1px;">${e.label}</div><div style="font-family:var(--mono);font-size:8px;color:var(--text3);">${e.lat.toFixed(1)}°, ${e.lon.toFixed(1)}°</div></div><div style="font-family:var(--mono);font-size:8px;color:${scolors[e.sev]};white-space:nowrap;">${e.sev.toUpperCase()}</div>`;
+    evList.appendChild(d);
+  });
+  function resize(){canvas.width=canvas.offsetWidth||600;canvas.height=canvas.offsetHeight||400;}
+  resize();window.addEventListener('resize',resize);
+  canvas.addEventListener('mousedown',e=>{isDragging=true;lastX=e.clientX;canvas.style.cursor='grabbing';});
+  window.addEventListener('mouseup',()=>{isDragging=false;canvas.style.cursor='grab';});
+  window.addEventListener('mousemove',e=>{if(isDragging){rot+=(e.clientX-lastX)*.004;lastX=e.clientX;}});
+  canvas.addEventListener('wheel',e=>{zoom=Math.max(.6,Math.min(2.2,zoom-e.deltaY*.001));e.preventDefault();},{passive:false});
+
+  function ll2xy(lat,lon,cx,cy,R){
+    const phi=lat*Math.PI/180;
+    const lam=(lon)*Math.PI/180+rot;
+    const x=R*Math.cos(phi)*Math.sin(lam);
+    const y=R*Math.sin(phi);
+    const z=R*Math.cos(phi)*Math.cos(lam);
+    return{x:cx+x*zoom,y:cy-y*zoom,vis:z>0};
+  }
+
+  let starField=null;
+  function buildStars(w,h){
+    starField=[];
+    for(let i=0;i<300;i++)starField.push({x:Math.random()*w,y:Math.random()*h,b:Math.random()*.7+.1,s:Math.random()<.02?2:1});
+  }
+
+  function drawFrame(){
+    const w=canvas.width,h=canvas.height;
+    if(!w||!h){requestAnimationFrame(drawFrame);return;}
+    if(!starField||starField.length===0)buildStars(w,h);
+    const cx=w/2,cy=h/2;
+    const R=Math.min(w,h)*.38;
+    ctx.clearRect(0,0,w,h);
+    // Deep space bg
+    const spaceBg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h));
+    spaceBg.addColorStop(0,'#03060f');spaceBg.addColorStop(1,'#010208');
+    ctx.fillStyle=spaceBg;ctx.fillRect(0,0,w,h);
+    // Stars
+    starField.forEach(s=>{ctx.fillStyle=`rgba(180,200,230,${s.b})`;ctx.fillRect(s.x,s.y,s.s,s.s);});
+    // Atmosphere glow outer
+    const atmOut=ctx.createRadialGradient(cx,cy,R*zoom*.92,cx,cy,R*zoom*1.18);
+    atmOut.addColorStop(0,'rgba(30,80,160,0.15)');atmOut.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(cx,cy,R*zoom*1.18,0,Math.PI*2);ctx.fillStyle=atmOut;ctx.fill();
+    // Ocean sphere
+    const oceanGrd=ctx.createRadialGradient(cx-R*.18,cy-R*.18,R*.08,cx,cy,R*zoom);
+    oceanGrd.addColorStop(0,'#1e4878');oceanGrd.addColorStop(.5,'#0f2a50');oceanGrd.addColorStop(1,'#050f22');
+    ctx.beginPath();ctx.arc(cx,cy,R*zoom,0,Math.PI*2);ctx.fillStyle=oceanGrd;ctx.fill();
+    // Clip to sphere
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,R*zoom,0,Math.PI*2);ctx.clip();
+    // Grid lines
+    ctx.strokeStyle='rgba(30,60,120,0.18)';ctx.lineWidth=.5;
+    for(let lat=-75;lat<=90;lat+=15){
+      ctx.beginPath();let first=true;
+      for(let lon=-180;lon<=180;lon+=3){
+        const p=ll2xy(lat,lon,cx,cy,R);if(!p.vis){first=true;continue;}
+        first?(ctx.moveTo(p.x,p.y),first=false):ctx.lineTo(p.x,p.y);
+      }ctx.stroke();
+    }
+    for(let lon=-165;lon<=180;lon+=15){
+      ctx.beginPath();let first=true;
+      for(let lat=-90;lat<=90;lat+=2){
+        const p=ll2xy(lat,lon,cx,cy,R);if(!p.vis){first=true;continue;}
+        first?(ctx.moveTo(p.x,p.y),first=false):ctx.lineTo(p.x,p.y);
+      }ctx.stroke();
+    }
+    // Continents
+    CONTINENTS.forEach(cont=>{
+      ctx.beginPath();let first=true;
+      cont.pts.forEach(([lat,lon])=>{
+        const p=ll2xy(lat,lon,cx,cy,R);
+        if(!p.vis){first=true;return;}
+        first?(ctx.moveTo(p.x,p.y),first=false):ctx.lineTo(p.x,p.y);
+      });
+      ctx.fillStyle=cont.col+'cc';ctx.fill();
+      ctx.strokeStyle=cont.stroke+'99';ctx.lineWidth=.7;ctx.stroke();
+    });
+    ctx.restore();
+    // Specular highlight
+    const spec=ctx.createRadialGradient(cx-R*.28,cy-R*.28,0,cx-R*.1,cy-R*.1,R*.7*zoom);
+    spec.addColorStop(0,'rgba(255,255,255,0.07)');spec.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(cx,cy,R*zoom,0,Math.PI*2);ctx.fillStyle=spec;ctx.fill();
+    // Globe border
+    ctx.beginPath();ctx.arc(cx,cy,R*zoom,0,Math.PI*2);ctx.strokeStyle='rgba(59,130,246,0.35)';ctx.lineWidth=1.5;ctx.stroke();
+    // Inner atmosphere rim
+    const atmIn=ctx.createRadialGradient(cx,cy,R*zoom*.97,cx,cy,R*zoom*1.04);
+    atmIn.addColorStop(0,'rgba(80,140,255,0.18)');atmIn.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(cx,cy,R*zoom*1.04,0,Math.PI*2);ctx.fillStyle=atmIn;ctx.fill();
+    // Event markers
+    const sevC={crit:'#ef4444',high:'#f59e0b',med:'#3b82f6',low:'#14b8a6'};
+    events.forEach(e=>{
+      const p=ll2xy(e.lat,e.lon,cx,cy,R);if(!p.vis)return;
+      const col=sevC[e.sev];
+      const pulse=(Math.sin(Date.now()/700+e.lat)*.5+.5);
+      ctx.beginPath();ctx.arc(p.x,p.y,(5+pulse*5)*zoom,0,Math.PI*2);
+      ctx.fillStyle=col+'22';ctx.fill();ctx.strokeStyle=col+'66';ctx.lineWidth=1;ctx.stroke();
+      ctx.beginPath();ctx.arc(p.x,p.y,3*zoom,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+      if(e.sev==='crit'||e.sev==='high'){
+        ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font=`${10*Math.min(zoom,1.2)}px IBM Plex Mono,monospace`;
+        ctx.fillText(e.label,p.x+8,p.y+3);
+      }
+    });
+    rot+=.0015;
+    requestAnimationFrame(drawFrame);
+  }
+  drawFrame();
+}
+// init analytics if already on analytics page
+window.addEventListener('DOMContentLoaded',()=>{initAnalytics();});
+</script>
+</body>
+</html>
